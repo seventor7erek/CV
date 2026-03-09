@@ -794,14 +794,13 @@ footer p {
     transform: translateY(-1px);
 }
 
-@media (max-width: 640px) {
-    .newsletter-form {
-        flex-direction: column;
-    }
+.newsletter-btn:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
 
-    .newsletter-btn {
-        width: 100%;
-    }
+.newsletter-btn:active {
+    transform: translateY(0);
 }
 
 /* ---- SEO Content Sections ---- */
@@ -1091,5 +1090,13 @@ footer p {
 
     .seo-section h2 {
         font-size: 1.25rem;
+    }
+
+    .newsletter-form {
+        flex-direction: column;
+    }
+
+    .newsletter-btn {
+        width: 100%;
     }
 }

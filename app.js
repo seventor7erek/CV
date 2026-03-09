@@ -176,6 +176,9 @@ downloadAllBtn.addEventListener('click', async (e) => {
     downloadAllBtn.disabled = true;
 
     try {
+        if (typeof JSZip === 'undefined') {
+            throw new Error('ZIP library not loaded');
+        }
         const zip = new JSZip();
         for (const result of successResults) {
             const response = await fetch(result.blobUrl);
@@ -188,6 +191,10 @@ downloadAllBtn.addEventListener('click', async (e) => {
         URL.revokeObjectURL(zipUrl);
     } catch (err) {
         console.error('ZIP creation failed:', err);
+        downloadAllBtn.textContent = 'ZIP failed — try again';
+        setTimeout(() => {
+            downloadAllBtn.textContent = 'Download All as ZIP';
+        }, 3000);
     } finally {
         downloadAllBtn.textContent = 'Download All as ZIP';
         downloadAllBtn.disabled = false;
@@ -196,10 +203,6 @@ downloadAllBtn.addEventListener('click', async (e) => {
 
 batchResetBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    batchResults.forEach(r => {
-        if (r.blobUrl) URL.revokeObjectURL(r.blobUrl);
-    });
-    batchResults = [];
     if (batchAudio) {
         batchAudio.pause();
         batchAudio = null;
@@ -375,6 +378,11 @@ async function convertFile(file) {
 
 // --- Batch Conversion ---
 async function handleBatch(files) {
+    if (files.length > 50) {
+        showError(`Too many files (${files.length}). Maximum is 50 files at once.`);
+        return;
+    }
+
     // Validate all files
     const oversized = files.filter(f => f.size > MAX_FILE_SIZE);
     if (oversized.length > 0) {
@@ -414,10 +422,12 @@ async function handleBatch(files) {
             const arrayBuffer = await files[i].arrayBuffer();
             const mp3Bytes = new Uint8Array(arrayBuffer);
             let wavBuffer;
+            let actualBitDepth = selectedBitDepth;
 
             if (wasmReady) {
                 wavBuffer = wasmModule.convertMp3ToWavWithDepth(mp3Bytes, selectedBitDepth).buffer;
             } else {
+                actualBitDepth = 16;
                 if (selectedBitDepth !== 16) {
                     console.warn('Web Audio fallback only supports 16-bit.');
                 }
@@ -436,7 +446,7 @@ async function handleBatch(files) {
             // Mark done
             statusEl.className = 'batch-item-status done';
             statusEl.innerHTML = '&#10003;';
-            infoEl.textContent = `${formatSize(blob.size)} · ${selectedBitDepth}-bit`;
+            infoEl.textContent = `${formatSize(blob.size)} · ${actualBitDepth}-bit`;
 
             // Add play + download buttons
             const playBtn = document.createElement('button');
@@ -460,24 +470,31 @@ async function handleBatch(files) {
     }
 
     // Show batch actions
-    dropZone.classList.add('done');
-    batchActions.classList.remove('hidden');
     const successCount = batchResults.filter(r => !r.error).length;
+    if (successCount === 0) {
+        dropZone.classList.add('error');
+        downloadAllBtn.classList.add('hidden');
+    } else {
+        dropZone.classList.add('done');
+        downloadAllBtn.classList.remove('hidden');
+    }
+    batchActions.classList.remove('hidden');
     batchCount.textContent = `${successCount}/${files.length}`;
     isProcessing = false;
 }
 
 function toggleBatchAudio(blobUrl, btn) {
-    if (batchAudio && !batchAudio.paused) {
+    // Reset all play buttons
+    batchQueue.querySelectorAll('.batch-item-play').forEach(b => { b.innerHTML = '&#9654;'; });
+
+    if (batchAudio) {
         batchAudio.pause();
         batchAudio.currentTime = 0;
-        // Reset all play buttons
-        batchQueue.querySelectorAll('.batch-item-play').forEach(b => { b.innerHTML = '&#9654;'; });
-        if (batchAudio._blobUrl === blobUrl) {
-            batchAudio = null;
-            return;
-        }
+        const wasSame = batchAudio._blobUrl === blobUrl;
+        batchAudio = null;
+        if (wasSame) return; // toggle off
     }
+
     batchAudio = new Audio(blobUrl);
     batchAudio._blobUrl = blobUrl;
     batchAudio.play();

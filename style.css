@@ -377,6 +377,33 @@ main {
     100% { transform: scale(1); opacity: 1; }
 }
 
+@keyframes fadeSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.drop-zone-done .done-text {
+    animation: fadeSlideIn 0.35s ease-out 0.15s both;
+}
+
+.drop-zone-done .file-comparison {
+    animation: fadeSlideIn 0.35s ease-out 0.25s both;
+}
+
+.drop-zone-done .done-buttons {
+    animation: fadeSlideIn 0.35s ease-out 0.35s both;
+}
+
+.drop-zone-done .btn-secondary {
+    animation: fadeSlideIn 0.35s ease-out 0.45s both;
+}
+
 .done-text {
     font-size: 1.2rem;
     font-weight: 600;
@@ -456,6 +483,14 @@ main {
     font-weight: 700;
     margin: 0 auto 1rem;
     animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.drop-zone-error .error-text {
+    animation: fadeSlideIn 0.35s ease-out 0.15s both;
+}
+
+.drop-zone-error .btn-secondary {
+    animation: fadeSlideIn 0.35s ease-out 0.3s both;
 }
 
 .error-text {

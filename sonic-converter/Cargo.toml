@@ -19,10 +19,10 @@ required-features = ["server"]
 
 [features]
 default = ["parallel", "mmap"]
-parallel = ["rayon"]
-mmap = ["memmap2"]
-wasm = ["wasm-bindgen", "js-sys", "web-sys", "console_error_panic_hook"]
-server = ["axum", "tokio", "tower", "tower-http", "serde", "serde_json", "uuid"]
+parallel = ["dep:rayon"]
+mmap = ["dep:memmap2"]
+wasm = ["dep:wasm-bindgen", "dep:js-sys", "dep:web-sys", "dep:console_error_panic_hook"]
+server = ["dep:axum", "dep:tokio", "dep:tower", "dep:tower-http", "dep:serde", "dep:serde_json", "dep:uuid", "dep:tempfile", "dep:tokio-util"]
 
 [dependencies]
 # Core: MP3 decoding
@@ -53,6 +53,9 @@ tower-http = { version = "0.6", optional = true, features = ["cors", "limit"] }
 serde = { version = "1", optional = true, features = ["derive"] }
 serde_json = { version = "1", optional = true }
 uuid = { version = "1", optional = true, features = ["v4"] }
+tempfile = { version = "3", optional = true }
+tokio-util = { version = "0.7", optional = true, features = ["io"] }
+
 
 [dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }

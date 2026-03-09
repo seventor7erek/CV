@@ -103,6 +103,7 @@
                         <p>While you wait, check out the <a href="/api/#docs">API documentation</a> to get familiar with the endpoints.</p>
                     </div>
                 </div>
+                <div id="formStatus" role="alert" aria-live="assertive" class="sr-only"></div>
             </div>
         </section>
     </main>
@@ -141,19 +142,22 @@
             });
 
             if (response.ok) {
+                const selectedPlan = form.plan.value;
                 formState.classList.add('hidden');
                 successState.classList.remove('hidden');
+                document.getElementById('formStatus').textContent = 'Request received. Check your email within 24 hours.';
                 if (typeof plausible !== 'undefined') {
-                    plausible('APIKeyRequest', { props: { plan: form.plan.value } });
+                    plausible('APIKeyRequest', { props: { plan: selectedPlan } });
                 }
             } else {
                 throw new Error('Form submission failed');
             }
         } catch (err) {
-            submitBtn.disabled = false;
             submitBtn.style.background = '#ef4444';
             submitBtn.textContent = 'Failed — try again';
+            document.getElementById('formStatus').textContent = 'Submission failed. Please try again.';
             setTimeout(() => {
+                submitBtn.disabled = false;
                 submitBtn.style.background = '';
                 submitBtn.textContent = 'Request API Key';
             }, 3000);

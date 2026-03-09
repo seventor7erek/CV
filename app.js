@@ -14,6 +14,8 @@ let isProcessing = false;
 let wasmReady = false;
 let wasmModule = null;
 let selectedBitDepth = 16;
+let batchResults = []; // { file, blobUrl, outputName, size, error }
+let batchAudio = null; // currently playing audio in batch mode
 
 // --- DOM ---
 const dropZone = document.getElementById('dropZone');
@@ -33,6 +35,12 @@ const convertAnotherBtn = document.getElementById('convertAnotherBtn');
 const retryBtn = document.getElementById('retryBtn');
 const errorText = document.getElementById('errorText');
 const bitDepthSelector = document.getElementById('bitDepthSelector');
+const dzBatch = document.getElementById('dzBatch');
+const batchCount = document.getElementById('batchCount');
+const batchQueue = document.getElementById('batchQueue');
+const batchActions = document.getElementById('batchActions');
+const downloadAllBtn = document.getElementById('downloadAllBtn');
+const batchResetBtn = document.getElementById('batchResetBtn');
 
 // --- Initialize WASM after page load (doesn't block tab spinner) ---
 let wasmInitResolve;
@@ -59,7 +67,7 @@ window.addEventListener('load', () => {
 
 // --- Panel Switching ---
 function showPanel(panel) {
-    [dzIdle, dzLoading, dzConverting, dzDone, dzError].forEach(p => {
+    [dzIdle, dzLoading, dzConverting, dzDone, dzError, dzBatch].forEach(p => {
         p.classList.add('hidden');
     });
     panel.classList.remove('hidden');
@@ -80,8 +88,18 @@ dropZone.addEventListener('drop', (e) => {
     e.preventDefault();
     dropZone.classList.remove('dragover');
     if (isProcessing) return;
-    const file = e.dataTransfer.files[0];
-    if (file) handleFile(file);
+    const files = Array.from(e.dataTransfer.files).filter(f =>
+        f.name.toLowerCase().endsWith('.mp3') || f.type === 'audio/mpeg'
+    );
+    if (files.length === 0) {
+        showError("No MP3 files found. Please drop valid .mp3 files.");
+        return;
+    }
+    if (files.length === 1) {
+        handleFile(files[0]);
+    } else {
+        handleBatch(files);
+    }
 });
 
 // --- Click / Browse ---
@@ -97,7 +115,14 @@ browseBtn.addEventListener('click', (e) => {
 });
 
 fileInput.addEventListener('change', () => {
-    if (fileInput.files[0]) handleFile(fileInput.files[0]);
+    const files = Array.from(fileInput.files).filter(f =>
+        f.name.toLowerCase().endsWith('.mp3') || f.type === 'audio/mpeg'
+    );
+    if (files.length === 1) {
+        handleFile(files[0]);
+    } else if (files.length > 1) {
+        handleBatch(files);
+    }
 });
 
 // --- Keyboard accessibility ---
@@ -133,6 +158,53 @@ bitDepthSelector.addEventListener('click', (e) => {
     bitDepthSelector.querySelectorAll('.bit-depth-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     selectedBitDepth = parseInt(btn.dataset.depth, 10);
+});
+
+// --- Batch Buttons ---
+downloadAllBtn.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    const successResults = batchResults.filter(r => !r.error);
+    if (successResults.length === 0) return;
+
+    if (successResults.length === 1) {
+        triggerDownload(successResults[0].blobUrl, successResults[0].outputName);
+        return;
+    }
+
+    // ZIP download
+    downloadAllBtn.textContent = 'Creating ZIP...';
+    downloadAllBtn.disabled = true;
+
+    try {
+        const zip = new JSZip();
+        for (const result of successResults) {
+            const response = await fetch(result.blobUrl);
+            const blob = await response.blob();
+            zip.file(result.outputName, blob);
+        }
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        const zipUrl = URL.createObjectURL(zipBlob);
+        triggerDownload(zipUrl, 'mp3towav-converted.zip');
+        URL.revokeObjectURL(zipUrl);
+    } catch (err) {
+        console.error('ZIP creation failed:', err);
+    } finally {
+        downloadAllBtn.textContent = 'Download All as ZIP';
+        downloadAllBtn.disabled = false;
+    }
+});
+
+batchResetBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    batchResults.forEach(r => {
+        if (r.blobUrl) URL.revokeObjectURL(r.blobUrl);
+    });
+    batchResults = [];
+    if (batchAudio) {
+        batchAudio.pause();
+        batchAudio = null;
+    }
+    reset();
 });
 
 // --- Prevent default drag on page ---
@@ -301,6 +373,121 @@ async function convertFile(file) {
     }
 }
 
+// --- Batch Conversion ---
+async function handleBatch(files) {
+    // Validate all files
+    const oversized = files.filter(f => f.size > MAX_FILE_SIZE);
+    if (oversized.length > 0) {
+        showError(`${oversized.length} file(s) exceed the 100 MB limit.`);
+        return;
+    }
+
+    isProcessing = true;
+    batchResults = [];
+    dropZone.classList.remove('done', 'error');
+    showPanel(dzBatch);
+    batchCount.textContent = files.length;
+    batchActions.classList.add('hidden');
+
+    // Build queue UI
+    batchQueue.innerHTML = files.map((f, i) => `
+        <div class="batch-item" data-index="${i}">
+            <span class="batch-item-status waiting">&#9679;</span>
+            <span class="batch-item-name">${escapeHtml(f.name)}</span>
+            <span class="batch-item-info">${formatSize(f.size)}</span>
+        </div>
+    `).join('');
+
+    // Process sequentially
+    await wasmInit;
+
+    for (let i = 0; i < files.length; i++) {
+        const item = batchQueue.querySelector(`[data-index="${i}"]`);
+        const statusEl = item.querySelector('.batch-item-status');
+        const infoEl = item.querySelector('.batch-item-info');
+
+        // Mark converting
+        statusEl.className = 'batch-item-status converting';
+        statusEl.innerHTML = '';
+
+        try {
+            const arrayBuffer = await files[i].arrayBuffer();
+            const mp3Bytes = new Uint8Array(arrayBuffer);
+            let wavBuffer;
+
+            if (wasmReady) {
+                wavBuffer = wasmModule.convertMp3ToWavWithDepth(mp3Bytes, selectedBitDepth).buffer;
+            } else {
+                if (selectedBitDepth !== 16) {
+                    console.warn('Web Audio fallback only supports 16-bit.');
+                }
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer.slice(0));
+                await audioCtx.close();
+                wavBuffer = encodeWAV(audioBuffer);
+            }
+
+            const outputName = files[i].name.replace(/\.mp3$/i, '.wav');
+            const blob = new Blob([wavBuffer], { type: 'audio/wav' });
+            const blobUrl = URL.createObjectURL(blob);
+
+            batchResults.push({ file: files[i], blobUrl, outputName, size: blob.size, error: null });
+
+            // Mark done
+            statusEl.className = 'batch-item-status done';
+            statusEl.innerHTML = '&#10003;';
+            infoEl.textContent = `${formatSize(blob.size)} · ${selectedBitDepth}-bit`;
+
+            // Add play + download buttons
+            const playBtn = document.createElement('button');
+            playBtn.type = 'button';
+            playBtn.className = 'batch-item-play';
+            playBtn.innerHTML = '&#9654;';
+            playBtn.title = 'Preview';
+            playBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleBatchAudio(blobUrl, playBtn);
+            });
+            item.appendChild(playBtn);
+
+        } catch (err) {
+            console.error(`Batch conversion failed for ${files[i].name}:`, err);
+            batchResults.push({ file: files[i], blobUrl: null, outputName: null, size: 0, error: err.message });
+            statusEl.className = 'batch-item-status error';
+            statusEl.innerHTML = '&#10007;';
+            infoEl.textContent = 'Failed';
+        }
+    }
+
+    // Show batch actions
+    dropZone.classList.add('done');
+    batchActions.classList.remove('hidden');
+    const successCount = batchResults.filter(r => !r.error).length;
+    batchCount.textContent = `${successCount}/${files.length}`;
+    isProcessing = false;
+}
+
+function toggleBatchAudio(blobUrl, btn) {
+    if (batchAudio && !batchAudio.paused) {
+        batchAudio.pause();
+        batchAudio.currentTime = 0;
+        // Reset all play buttons
+        batchQueue.querySelectorAll('.batch-item-play').forEach(b => { b.innerHTML = '&#9654;'; });
+        if (batchAudio._blobUrl === blobUrl) {
+            batchAudio = null;
+            return;
+        }
+    }
+    batchAudio = new Audio(blobUrl);
+    batchAudio._blobUrl = blobUrl;
+    batchAudio.play();
+    btn.innerHTML = '&#9646;&#9646;';
+    batchAudio.addEventListener('ended', () => {
+        btn.innerHTML = '&#9654;';
+        batchAudio = null;
+    });
+}
+
 // --- Download Helper ---
 function triggerDownload(url, filename) {
     const a = document.createElement('a');
@@ -324,6 +511,14 @@ function reset() {
     if (lastBlobUrl) {
         URL.revokeObjectURL(lastBlobUrl);
         lastBlobUrl = null;
+    }
+    batchResults.forEach(r => {
+        if (r.blobUrl) URL.revokeObjectURL(r.blobUrl);
+    });
+    batchResults = [];
+    if (batchAudio) {
+        batchAudio.pause();
+        batchAudio = null;
     }
     lastFileName = null;
     fileInput.value = '';
@@ -353,4 +548,7 @@ window.addEventListener('beforeunload', () => {
         URL.revokeObjectURL(lastBlobUrl);
         lastBlobUrl = null;
     }
+    batchResults.forEach(r => {
+        if (r.blobUrl) URL.revokeObjectURL(r.blobUrl);
+    });
 });

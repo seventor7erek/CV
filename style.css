@@ -544,6 +544,110 @@ main {
     border-left: 1px solid var(--border);
 }
 
+/* ---- Batch Queue ---- */
+.batch-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.batch-queue {
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.batch-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.6rem 0.75rem;
+    font-size: 0.85rem;
+}
+
+.batch-item-status {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+}
+
+.batch-item-status.waiting { color: var(--text-muted); }
+.batch-item-status.converting { color: var(--primary); }
+.batch-item-status.done { color: var(--success); }
+.batch-item-status.error { color: var(--error); }
+
+.batch-item-name {
+    flex: 1;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.batch-item-info {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.batch-item-play {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    transition: border-color 0.2s, color 0.2s;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.batch-item-play:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.batch-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+@keyframes batch-spin {
+    to { transform: rotate(360deg); }
+}
+
+.batch-item-status.converting::after {
+    content: '';
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: batch-spin 0.8s linear infinite;
+}
+
 /* ---- Footer ---- */
 footer {
     padding: 1rem 0;

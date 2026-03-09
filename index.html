@@ -172,7 +172,7 @@
                             <span class="bar"></span>
                             <span class="bar"></span>
                         </div>
-                        <p class="drop-text">Drop your MP3 here</p>
+                        <p class="drop-text">Drop your MP3 files here</p>
                         <p class="drop-subtext">or <button type="button" id="browseBtn" class="browse-link">browse files</button></p>
                         <p class="drop-limit">MP3 files up to 100 MB</p>
                     </div>
@@ -208,8 +208,18 @@
                         <p class="error-text" id="errorText"></p>
                         <button type="button" class="btn-secondary" id="retryBtn">Try again</button>
                     </div>
+
+                    <!-- Batch State -->
+                    <div class="drop-zone-batch hidden" id="dzBatch">
+                        <p class="batch-title">Converting <span id="batchCount">0</span> files</p>
+                        <div class="batch-queue" id="batchQueue"></div>
+                        <div class="batch-actions hidden" id="batchActions">
+                            <button type="button" class="btn-primary" id="downloadAllBtn">Download All as ZIP</button>
+                            <button type="button" class="btn-secondary" id="batchResetBtn">Convert more files</button>
+                        </div>
+                    </div>
                 </div>
-                <input type="file" id="fileInput" accept=".mp3,audio/mpeg" hidden>
+                <input type="file" id="fileInput" accept=".mp3,audio/mpeg" multiple hidden>
                 <div class="bit-depth-selector" id="bitDepthSelector">
                     <span class="bit-depth-label">Output quality</span>
                     <div class="bit-depth-options">
@@ -369,6 +379,7 @@
         </div>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3/dist/jszip.min.js" defer></script>
     <script defer src="app.js"></script>
 </body>
 </html>

@@ -8,7 +8,7 @@ COPY Cargo.toml Cargo.lock ./
 COPY src/ src/
 RUN mkdir -p benches && echo "fn main() {}" > benches/conversion.rs
 
-RUN cargo generate-lockfile --features server && cargo build --bin sonic-server --features server --release
+RUN rm -f Cargo.lock && cargo build --bin sonic-server --features server --release
 
 # Stage 2: Minimal runtime image
 FROM debian:bookworm-slim

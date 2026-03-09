@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y pkg-config && rm -rf /var/lib/apt/lists
 WORKDIR /app
 COPY Cargo.toml Cargo.lock ./
 COPY src/ src/
+RUN mkdir -p benches && echo "fn main() {}" > benches/conversion.rs
 
 RUN cargo build --bin sonic-server --features server --release
 

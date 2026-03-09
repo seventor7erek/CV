@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Your API Key — Sonic Converter API | mp3towav.online</title>
+    <meta name="description" content="Request a free API key for the Sonic Converter API. Convert MP3 to WAV programmatically with 500 free conversions per month.">
+    <meta property="og:title" content="Get Your API Key — Sonic Converter API">
+    <meta property="og:description" content="Request a free API key. 500 free conversions per month. No credit card required.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://mp3towav.online/api/get-key/">
+    <meta property="og:image" content="https://mp3towav.online/og-image.png">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:image" content="https://mp3towav.online/og-image.png">
+    <link rel="canonical" href="https://mp3towav.online/api/get-key/">
+    <link rel="icon" type="image/svg+xml" href="/public/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" crossorigin>
+    <link rel="stylesheet" href="/content.css">
+    <link rel="stylesheet" href="/api/get-key/get-key.css">
+    <script defer data-domain="mp3towav.online" src="https://plausible.io/js/script.js"></script>
+</head>
+<body>
+    <header>
+        <nav class="site-nav">
+            <a href="/" class="nav-logo">mp3towav<span>.online</span></a>
+            <div class="nav-links">
+                <a href="/">Converter</a>
+                <a href="/blog/">Blog</a>
+                <a href="/faq/">FAQ</a>
+                <a href="/about/">About</a>
+                <a href="/api/" class="active">API</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="article">
+            <div class="container">
+                <h1>Get Your API Key</h1>
+                <p class="meta">Start converting MP3 to WAV programmatically. Free tier includes 500 conversions/month.</p>
+
+                <!-- Form State -->
+                <div id="formState">
+                    <form id="keyRequestForm" action="https://formspree.io/f/FORM_ID" method="POST">
+                        <div class="form-group">
+                            <label for="email">Email address</label>
+                            <input type="email" id="email" name="email" required placeholder="you@example.com" autocomplete="email">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Plan</label>
+                            <div class="plan-options">
+                                <label class="plan-option">
+                                    <input type="radio" name="plan" value="free" checked>
+                                    <span class="plan-card">
+                                        <strong>Free</strong>
+                                        <span>500 conversions/mo · 16-bit</span>
+                                    </span>
+                                </label>
+                                <label class="plan-option">
+                                    <input type="radio" name="plan" value="pro">
+                                    <span class="plan-card">
+                                        <strong>Pro — $9/mo</strong>
+                                        <span>5,000 conversions/mo · 16/24-bit</span>
+                                    </span>
+                                </label>
+                                <label class="plan-option">
+                                    <input type="radio" name="plan" value="business">
+                                    <span class="plan-card">
+                                        <strong>Business — $19/mo</strong>
+                                        <span>25,000 conversions/mo · 16/24/32-bit</span>
+                                    </span>
+                                </label>
+                                <label class="plan-option">
+                                    <input type="radio" name="plan" value="unlimited">
+                                    <span class="plan-card">
+                                        <strong>Unlimited — $49/mo</strong>
+                                        <span>Unlimited conversions · 16/24/32-bit</span>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="usecase">What will you use the API for? <span class="optional">(optional)</span></label>
+                            <textarea id="usecase" name="usecase" rows="3" placeholder="e.g., batch processing audio files for my podcast platform"></textarea>
+                        </div>
+
+                        <input type="hidden" name="_subject" value="New API Key Request">
+                        <button type="submit" class="form-submit" id="submitBtn">Request API Key</button>
+                    </form>
+                    <p class="form-note">We'll send your API key within 24 hours. Paid plans require a separate subscription — <a href="/api/#docs">see pricing</a>.</p>
+                </div>
+
+                <!-- Success State -->
+                <div id="successState" class="hidden">
+                    <div class="success-card">
+                        <div class="success-icon">&#10003;</div>
+                        <h2>Request Received!</h2>
+                        <p>We'll send your API key to the email address you provided within 24 hours.</p>
+                        <p>While you wait, check out the <a href="/api/#docs">API documentation</a> to get familiar with the endpoints.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <a href="/">MP3 to WAV Converter</a>
+                <a href="/blog/">Blog</a>
+                <a href="/faq/">FAQ</a>
+                <a href="/about/">About</a>
+                <a href="/api/">API</a>
+                <a href="/privacy/">Privacy</a>
+                <a href="/terms/">Terms</a>
+            </div>
+            <p>&copy; 2026 mp3towav.online — Free, private MP3 to WAV conversion.</p>
+        </div>
+    </footer>
+
+    <script>
+    const form = document.getElementById('keyRequestForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const formState = document.getElementById('formState');
+    const successState = document.getElementById('successState');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Sending...';
+
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: { 'Accept': 'application/json' }
+            });
+
+            if (response.ok) {
+                formState.classList.add('hidden');
+                successState.classList.remove('hidden');
+                if (typeof plausible !== 'undefined') {
+                    plausible('APIKeyRequest', { props: { plan: form.plan.value } });
+                }
+            } else {
+                throw new Error('Form submission failed');
+            }
+        } catch (err) {
+            submitBtn.disabled = false;
+            submitBtn.style.background = '#ef4444';
+            submitBtn.textContent = 'Failed — try again';
+            setTimeout(() => {
+                submitBtn.style.background = '';
+                submitBtn.textContent = 'Request API Key';
+            }, 3000);
+        }
+    });
+    </script>
+</body>
+</html>

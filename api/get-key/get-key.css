@@ -1,0 +1,188 @@
+/* ============================================
+   API Key Request Page Styles
+   Extends content.css
+   ============================================ */
+
+/* ---- Form ---- */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+}
+
+.form-group .optional {
+    font-weight: 400;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.form-group input[type="email"],
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: var(--font-main);
+    font-size: 0.95rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input[type="email"]:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
+}
+
+.form-group input[type="email"]::placeholder,
+.form-group textarea::placeholder {
+    color: var(--text-muted);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* ---- Plan Selection ---- */
+.plan-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.plan-option {
+    cursor: pointer;
+    display: block;
+}
+
+.plan-option input[type="radio"] {
+    display: none;
+}
+
+.plan-card {
+    display: block;
+    padding: 0.85rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.plan-option input[type="radio"]:checked + .plan-card {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 1px var(--primary), 0 0 12px rgba(249, 115, 22, 0.1);
+}
+
+.plan-card:hover {
+    border-color: var(--border-hover);
+}
+
+.plan-option input[type="radio"]:checked + .plan-card:hover {
+    border-color: var(--primary);
+}
+
+.plan-card strong {
+    display: block;
+    font-size: 0.95rem;
+    color: var(--text);
+    margin-bottom: 0.15rem;
+}
+
+.plan-card span {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* ---- Submit Button ---- */
+.form-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.85rem 2.5rem;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-family: var(--font-main);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    width: 100%;
+    max-width: 320px;
+}
+
+.form-submit:hover {
+    background: #ea6a0e;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(249, 115, 22, 0.25);
+}
+
+.form-submit:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.form-note {
+    margin-top: 1rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.form-note a {
+    color: var(--primary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+/* ---- Success State ---- */
+.success-card {
+    text-align: center;
+    padding: 2rem 1rem;
+}
+
+.success-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #22c55e;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0 auto 1.5rem;
+}
+
+.success-card h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.success-card p {
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+}
+
+.success-card a {
+    color: var(--primary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+/* ---- Utility ---- */
+.hidden {
+    display: none !important;
+}

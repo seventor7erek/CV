@@ -91,11 +91,15 @@ dropZone.addEventListener('drop', (e) => {
     e.preventDefault();
     dropZone.classList.remove('dragover');
     if (isProcessing) return;
-    const files = Array.from(e.dataTransfer.files).filter(f =>
+    const allFiles = Array.from(e.dataTransfer.files);
+    const files = allFiles.filter(f =>
         f.name.toLowerCase().endsWith('.mp3') || f.type === 'audio/mpeg'
     );
     if (files.length === 0) {
-        showError("No MP3 files found. Please drop valid .mp3 files.");
+        const rejected = allFiles[0];
+        const ext = rejected ? rejected.name.split('.').pop().toLowerCase() : 'unknown';
+        showError('Only MP3 files are supported. You dropped a .' + ext + ' file.');
+        trackEvent('FileRejected', { extension: ext });
         return;
     }
     if (files.length === 1) {
@@ -118,9 +122,17 @@ browseBtn.addEventListener('click', (e) => {
 });
 
 fileInput.addEventListener('change', () => {
-    const files = Array.from(fileInput.files).filter(f =>
+    const allFiles = Array.from(fileInput.files);
+    const files = allFiles.filter(f =>
         f.name.toLowerCase().endsWith('.mp3') || f.type === 'audio/mpeg'
     );
+    if (files.length === 0 && allFiles.length > 0) {
+        const ext = allFiles[0].name.split('.').pop().toLowerCase();
+        showError('Only MP3 files are supported. You selected a .' + ext + ' file.');
+        trackEvent('FileRejected', { extension: ext });
+        fileInput.value = '';
+        return;
+    }
     if (files.length === 1) {
         handleFile(files[0]);
     } else if (files.length > 1) {

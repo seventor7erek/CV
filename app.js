@@ -514,7 +514,9 @@ async function handleBatch(files) {
     batchActions.classList.remove('hidden');
     batchCount.textContent = `${successCount}/${files.length}`;
     isProcessing = false;
-    trackEvent('Conversion', { type: 'batch', bitDepth: String(selectedBitDepth), fileCount: String(successCount) });
+    if (successCount > 0) {
+        trackEvent('Conversion', { type: 'batch', bitDepth: String(wasmReady ? selectedBitDepth : 16), fileCount: String(successCount) });
+    }
 }
 
 function toggleBatchAudio(blobUrl, btn) {

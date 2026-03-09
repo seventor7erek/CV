@@ -9,14 +9,19 @@
     <meta property="og:description" content="Everything you need to know about converting MP3 to WAV online. Get answers to the most common questions.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://mp3towav.online/faq/">
+    <meta property="og:image" content="https://mp3towav.online/og-image.png">
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="MP3 to WAV Converter FAQ">
+    <meta name="twitter:image" content="https://mp3towav.online/og-image.png">
     <link rel="canonical" href="https://mp3towav.online/faq/">
     <link rel="icon" type="image/svg+xml" href="/public/favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" crossorigin>
     <link rel="stylesheet" href="/content.css">
+
+    <!-- Plausible Analytics -->
+    <script defer data-domain="mp3towav.online" src="https://plausible.io/js/script.js"></script>
 
     <script type="application/ld+json">
     {
@@ -33,9 +38,9 @@
             {"@type": "Question", "name": "Does it work on mobile?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. The converter works on any modern browser on both desktop and mobile devices, including Chrome, Firefox, Safari, and Edge."}},
             {"@type": "Question", "name": "What codec does the output WAV file use?", "acceptedAnswer": {"@type": "Answer", "text": "The output uses PCM signed 16-bit little-endian (pcm_s16le), which is the most widely compatible WAV format across all audio software."}},
             {"@type": "Question", "name": "Why is the WAV file so much larger than the MP3?", "acceptedAnswer": {"@type": "Answer", "text": "WAV is uncompressed audio. A 5 MB MP3 file might produce a 50 MB WAV file because WAV stores every audio sample without compression."}},
-            {"@type": "Question", "name": "Do I need to install anything?", "acceptedAnswer": {"@type": "Answer", "text": "No. The converter runs entirely in your browser. The audio engine (FFmpeg compiled to WebAssembly) loads automatically on first use."}},
+            {"@type": "Question", "name": "Do I need to install anything?", "acceptedAnswer": {"@type": "Answer", "text": "No. The converter runs entirely in your browser. The audio engine (Sonic Converter, built with WebAssembly) loads automatically on first use."}},
             {"@type": "Question", "name": "Can I use the converted WAV in FL Studio, Ableton, or Pro Tools?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. The PCM WAV output is compatible with every major DAW including FL Studio, Ableton Live, Pro Tools, Logic Pro, Reaper, and more."}},
-            {"@type": "Question", "name": "How is this different from other online converters?", "acceptedAnswer": {"@type": "Answer", "text": "Most online converters upload your files to their servers for processing. mp3towav.online processes everything locally in your browser using FFmpeg.wasm — your files never leave your device."}},
+            {"@type": "Question", "name": "How is this different from other online converters?", "acceptedAnswer": {"@type": "Answer", "text": "Most online converters upload your files to their servers for processing. mp3towav.online processes everything locally in your browser using WebAssembly — your files never leave your device."}},
             {"@type": "Question", "name": "Is WebAssembly safe?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. WebAssembly runs in your browser's sandbox with the same security protections as JavaScript. It cannot access your file system or network without your explicit permission."}},
             {"@type": "Question", "name": "Can I convert WAV back to MP3?", "acceptedAnswer": {"@type": "Answer", "text": "This tool is specifically built for MP3 to WAV conversion. For WAV to MP3, you would need a separate encoder."}}
         ]
@@ -50,6 +55,7 @@
                 <a href="/">Converter</a>
                 <a href="/blog/">Blog</a>
                 <a href="/faq/" class="active">FAQ</a>
+                <a href="/api/">API</a>
             </div>
         </nav>
     </header>
@@ -134,7 +140,7 @@
                     <details class="faq-item">
                         <summary>Do I need to install anything?</summary>
                         <div class="answer">
-                            <p>No. Everything runs in your browser. The audio engine (FFmpeg compiled to WebAssembly) loads automatically the first time you convert a file. No plugins, extensions, or downloads needed.</p>
+                            <p>No. Everything runs in your browser. The audio engine (Sonic Converter, a WebAssembly audio engine) loads automatically the first time you convert a file. No plugins, extensions, or downloads needed.</p>
                         </div>
                     </details>
 
@@ -182,8 +188,9 @@
                 <a href="/">MP3 to WAV Converter</a>
                 <a href="/blog/">Blog</a>
                 <a href="/faq/">FAQ</a>
-                <a href="/blog/wav-vs-mp3-music-production/">WAV vs MP3</a>
-                <a href="/blog/privacy-in-audio-conversion/">Privacy</a>
+                <a href="/api/">API</a>
+                <a href="/privacy/">Privacy</a>
+                <a href="/terms/">Terms</a>
             </div>
             <p>&copy; 2026 mp3towav.online — Free, private MP3 to WAV conversion.</p>
         </div>

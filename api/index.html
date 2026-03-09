@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sonic Converter API — MP3 to WAV Conversion API | mp3towav.online</title>
+    <meta name="description" content="Convert MP3 to WAV programmatically with the Sonic Converter API. Free tier available. Fast, reliable audio conversion for developers and businesses.">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Sonic Converter API — MP3 to WAV Conversion API">
+    <meta property="og:description" content="Convert MP3 to WAV programmatically. Free tier with 500 conversions/month. Fast, reliable audio conversion API.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://mp3towav.online/api/">
+    <meta property="og:image" content="https://mp3towav.online/og-image.png">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:image" content="https://mp3towav.online/og-image.png">
+
+    <!-- Canonical -->
+    <link rel="canonical" href="https://mp3towav.online/api/">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/public/favicon.svg">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" crossorigin>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/content.css">
+    <link rel="stylesheet" href="/api/api.css">
+
+    <!-- Plausible Analytics -->
+    <script defer data-domain="mp3towav.online" src="https://plausible.io/js/script.js"></script>
+
+    <!-- Schema -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebAPI",
+        "name": "Sonic Converter API",
+        "description": "MP3 to WAV conversion API for developers and businesses.",
+        "url": "https://mp3towav.online/api/",
+        "provider": {
+            "@type": "Organization",
+            "name": "mp3towav.online",
+            "url": "https://mp3towav.online"
+        }
+    }
+    </script>
+</head>
+<body>
+    <header>
+        <nav class="site-nav">
+            <a href="/" class="nav-logo">mp3towav<span>.online</span></a>
+            <div class="nav-links">
+                <a href="/">Converter</a>
+                <a href="/blog/">Blog</a>
+                <a href="/faq/">FAQ</a>
+                <a href="/api/" class="active">API</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="article">
+            <div class="container">
+
+                <!-- Hero -->
+                <div class="api-hero">
+                    <h1>Sonic Converter API</h1>
+                    <p class="api-subtitle">Convert MP3 to WAV programmatically. High-fidelity PCM output, sub-second latency, simple REST interface.</p>
+                </div>
+
+                <!-- Pricing -->
+                <div class="pricing-grid">
+                    <div class="pricing-card">
+                        <div class="pricing-tier">Free</div>
+                        <div class="pricing-price">$0<span>/month</span></div>
+                        <ul class="pricing-features">
+                            <li>500 conversions/month</li>
+                            <li>100 MB max file size</li>
+                            <li>16-bit PCM output</li>
+                            <li>Standard priority</li>
+                            <li>Community support</li>
+                        </ul>
+                        <a href="#get-started" class="pricing-btn pricing-btn-secondary">Get Started</a>
+                    </div>
+
+                    <div class="pricing-card">
+                        <div class="pricing-tier">Pro</div>
+                        <div class="pricing-price">$9<span>/month</span></div>
+                        <ul class="pricing-features">
+                            <li>5,000 conversions/month</li>
+                            <li>500 MB max file size</li>
+                            <li>16/24-bit output</li>
+                            <li>Standard priority</li>
+                            <li>Email support</li>
+                        </ul>
+                        <a class="gumroad-button pricing-btn pricing-btn-primary" href="https://mp3towav.gumroad.com/l/SONIC_PRO">Subscribe</a>
+                    </div>
+
+                    <div class="pricing-card pricing-card-featured">
+                        <div class="pricing-badge">Most Popular</div>
+                        <div class="pricing-tier">Business</div>
+                        <div class="pricing-price">$19<span>/month</span></div>
+                        <ul class="pricing-features">
+                            <li>25,000 conversions/month</li>
+                            <li>2 GB max file size</li>
+                            <li>16/24/32-bit output</li>
+                            <li>Priority processing</li>
+                            <li>Priority email support</li>
+                            <li>Webhook callbacks</li>
+                        </ul>
+                        <a class="gumroad-button pricing-btn pricing-btn-primary" href="https://mp3towav.gumroad.com/l/SONIC_BUSINESS">Subscribe</a>
+                    </div>
+
+                    <div class="pricing-card">
+                        <div class="pricing-tier">Unlimited</div>
+                        <div class="pricing-price">$49<span>/month</span></div>
+                        <ul class="pricing-features">
+                            <li>Unlimited conversions</li>
+                            <li>5 GB max file size</li>
+                            <li>16/24/32-bit output</li>
+                            <li>Priority processing</li>
+                            <li>Dedicated support</li>
+                            <li>Webhook callbacks</li>
+                            <li>Custom output formats</li>
+                        </ul>
+                        <a class="gumroad-button pricing-btn pricing-btn-primary" href="https://mp3towav.gumroad.com/l/SONIC_UNLIMITED">Subscribe</a>
+                    </div>
+                </div>
+
+                <!-- Comparison Table -->
+                <h2>Feature Comparison</h2>
+                <div class="table-wrapper">
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>Free</th>
+                                <th>Pro</th>
+                                <th>Business</th>
+                                <th>Unlimited</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Monthly conversions</td>
+                                <td>500</td>
+                                <td>5,000</td>
+                                <td>25,000</td>
+                                <td>Unlimited</td>
+                            </tr>
+                            <tr>
+                                <td>Max file size</td>
+                                <td>100 MB</td>
+                                <td>500 MB</td>
+                                <td>2 GB</td>
+                                <td>5 GB</td>
+                            </tr>
+                            <tr>
+                                <td>Output format</td>
+                                <td>PCM WAV</td>
+                                <td>PCM WAV</td>
+                                <td>PCM WAV</td>
+                                <td>PCM WAV + custom</td>
+                            </tr>
+                            <tr>
+                                <td>Bit depth</td>
+                                <td>16-bit</td>
+                                <td>16/24-bit</td>
+                                <td>16/24/32-bit</td>
+                                <td>16/24/32-bit</td>
+                            </tr>
+                            <tr>
+                                <td>Webhook callbacks</td>
+                                <td>&mdash;</td>
+                                <td>&mdash;</td>
+                                <td>&#10003;</td>
+                                <td>&#10003;</td>
+                            </tr>
+                            <tr>
+                                <td>Priority processing</td>
+                                <td>&mdash;</td>
+                                <td>&mdash;</td>
+                                <td>&#10003;</td>
+                                <td>&#10003;</td>
+                            </tr>
+                            <tr>
+                                <td>Support</td>
+                                <td>Community</td>
+                                <td>Email</td>
+                                <td>Priority Email</td>
+                                <td>Dedicated</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Quick Start -->
+                <h2 id="docs">Quick Start</h2>
+                <p>Get converting in under a minute. Authenticate with your API key and POST your MP3 file.</p>
+                <p>Pass your API key via the <code>x-api-key</code> header. Alternatively, <code>Authorization: Bearer YOUR_API_KEY</code> is also accepted.</p>
+
+                <h3>Parameters</h3>
+                <ul>
+                    <li><code>file</code> (required) — The MP3 file to convert (multipart form upload).</li>
+                    <li><code>bit_depth</code> (optional) — Output bit depth: <code>16</code> (default), <code>24</code> (Pro+), or <code>32</code> (Business+).</li>
+                </ul>
+
+                <div class="code-block">
+                    <div class="code-label">cURL</div>
+                    <pre><code>curl -X POST https://api.mp3towav.online/v1/convert \
+  -H "x-api-key: YOUR_API_KEY" \
+  -F "file=@input.mp3" \
+  -o output.wav</code></pre>
+                </div>
+
+                <div class="code-block">
+                    <div class="code-label">Python</div>
+                    <pre><code>import requests
+
+with open("input.mp3", "rb") as f:
+    response = requests.post(
+        "https://api.mp3towav.online/v1/convert",
+        headers={"x-api-key": "YOUR_API_KEY"},
+        files={"file": f}
+    )
+
+with open("output.wav", "wb") as out:
+    out.write(response.content)</code></pre>
+                </div>
+
+                <div class="code-block">
+                    <div class="code-label">JavaScript (Node.js 18+)</div>
+                    <pre><code>import { readFileSync, writeFileSync } from "fs";
+
+const form = new FormData();
+form.append("file", new Blob([readFileSync("input.mp3")]), "input.mp3");
+
+const res = await fetch("https://api.mp3towav.online/v1/convert", {
+  method: "POST",
+  headers: { "x-api-key": "YOUR_API_KEY" },
+  body: form
+});
+
+writeFileSync("output.wav", Buffer.from(await res.arrayBuffer()));</code></pre>
+                </div>
+
+                <!-- Response Format -->
+                <h2>Response Format</h2>
+                <p>Successful conversions return the WAV file as binary with <code>Content-Type: audio/wav</code>. Errors return JSON:</p>
+                <div class="code-block">
+                    <div class="code-label">Error Response</div>
+                    <pre><code>{
+  "error": "file_too_large",
+  "message": "File exceeds the 100 MB limit for your plan.",
+  "status": 413
+}</code></pre>
+                </div>
+
+                <!-- File Info Endpoint -->
+                <h2>File Info</h2>
+                <p>Get metadata about an MP3 file without converting it. POST to <code>/v1/info</code> with the same authentication and file upload format.</p>
+
+                <div class="code-block">
+                    <div class="code-label">cURL</div>
+                    <pre><code>curl -X POST https://api.mp3towav.online/v1/info \
+  -H "x-api-key: YOUR_API_KEY" \
+  -F "file=@input.mp3"</code></pre>
+                </div>
+
+                <div class="code-block">
+                    <div class="code-label">Response</div>
+                    <pre><code>{
+  "sample_rate": 44100,
+  "channels": 2,
+  "duration_secs": 245.7,
+  "bit_rate_kbps": 320,
+  "estimated_wav_size_mb": 25.1
+}</code></pre>
+                </div>
+
+                <!-- Health Check -->
+                <h2>Health Check</h2>
+                <p>Check if the API is online. No authentication required.</p>
+
+                <div class="code-block">
+                    <div class="code-label">cURL</div>
+                    <pre><code>curl https://api.mp3towav.online/health</code></pre>
+                </div>
+                <p>Returns <code>200 OK</code> with <code>{"status": "ok"}</code> when the service is running.</p>
+
+                <!-- CTA -->
+                <div class="cta-box" id="get-started">
+                    <h3>Get your API key</h3>
+                    <p>Start with 500 free conversions per month. No credit card required.</p>
+                    <a href="mailto:api@mp3towav.online?subject=API%20Key%20Request" class="cta-btn">Request API Key</a>
+                </div>
+
+                <!--
+                    GUMROAD INTEGRATION:
+                    1. Create subscription products on Gumroad (mp3towav.gumroad.com):
+                       - "Sonic Converter API - Pro" ($9/mo recurring)
+                       - "Sonic Converter API - Business" ($19/mo recurring)
+                       - "Sonic Converter API - Unlimited" ($49/mo recurring)
+                    2. Get each product's short URL slug (the part after /l/)
+                    3. Replace SONIC_PRO, SONIC_BUSINESS, SONIC_UNLIMITED above
+                -->
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <a href="/">MP3 to WAV Converter</a>
+                <a href="/blog/">Blog</a>
+                <a href="/faq/">FAQ</a>
+                <a href="/api/">API</a>
+                <a href="/privacy/">Privacy</a>
+                <a href="/terms/">Terms</a>
+            </div>
+            <p>&copy; 2026 mp3towav.online — Free, private MP3 to WAV conversion.</p>
+        </div>
+    </footer>
+
+    <!-- Gumroad Overlay Checkout -->
+    <script src="https://gumroad.com/js/gumroad.js"></script>
+</body>
+</html>

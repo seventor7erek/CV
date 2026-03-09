@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy — mp3towav.online</title>
+    <meta name="description" content="Privacy policy for mp3towav.online. Your files never leave your device. No cookies, no tracking, no data collection. Learn how our MP3 to WAV converter protects your privacy.">
+    <meta property="og:title" content="Privacy Policy — mp3towav.online">
+    <meta property="og:description" content="Your files never leave your device. No cookies, no tracking, no data collection.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://mp3towav.online/privacy/">
+    <meta property="og:image" content="https://mp3towav.online/og-image.png">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Privacy Policy — mp3towav.online">
+    <meta name="twitter:image" content="https://mp3towav.online/og-image.png">
+    <link rel="canonical" href="https://mp3towav.online/privacy/">
+    <link rel="icon" type="image/svg+xml" href="/public/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" crossorigin>
+    <link rel="stylesheet" href="/content.css">
+    <script defer data-domain="mp3towav.online" src="https://plausible.io/js/script.js"></script>
+</head>
+<body>
+    <header>
+        <nav class="site-nav">
+            <a href="/" class="nav-logo">mp3towav<span>.online</span></a>
+            <div class="nav-links">
+                <a href="/">Converter</a>
+                <a href="/blog/">Blog</a>
+                <a href="/faq/">FAQ</a>
+                <a href="/api/">API</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <article class="article">
+            <div class="container">
+                <h1>Privacy Policy</h1>
+                <p class="meta">Last updated: March 9, 2026</p>
+
+                <h2>The Short Version</h2>
+                <p>Your audio files never leave your device. The MP3 to WAV converter on mp3towav.online runs entirely in your browser using WebAssembly. No files are uploaded, stored, or processed on any server. We do not collect personal data, we do not use cookies, and we do not track you across the web.</p>
+
+                <h2>How the Converter Works</h2>
+                <p>The converter uses <strong>Sonic Converter</strong>, a WebAssembly-based audio engine that runs directly in your browser. When you convert a file:</p>
+                <ul>
+                    <li>Your MP3 file is read locally by your browser — it is never uploaded to any server.</li>
+                    <li>The WebAssembly engine decodes the MP3 and encodes it as WAV entirely in memory on your device.</li>
+                    <li>The converted WAV file is saved directly to your device via your browser's download mechanism.</li>
+                    <li>No audio data is transmitted over the network at any point during conversion.</li>
+                    <li>When you close the tab, all data in memory is discarded.</li>
+                </ul>
+                <p>You can verify this yourself by opening your browser's developer tools (Network tab) during conversion — you will see no outgoing file uploads.</p>
+
+                <h2>Data We Do Not Collect</h2>
+                <p>To be explicit about what we do <strong>not</strong> do:</p>
+                <ul>
+                    <li><strong>No file collection</strong> — We never upload, store, access, or process your audio files on any server.</li>
+                    <li><strong>No cookies</strong> — We do not set any cookies, including tracking cookies, session cookies, or advertising cookies.</li>
+                    <li><strong>No fingerprinting</strong> — We do not use browser fingerprinting or any other technique to identify individual users.</li>
+                    <li><strong>No data selling</strong> — We do not sell, share, or monetize any user data because we do not collect any.</li>
+                    <li><strong>No accounts</strong> — There is no user registration, no login, and no personal information required to use the converter.</li>
+                </ul>
+
+                <h2>Analytics</h2>
+                <p>We use <a href="https://plausible.io" target="_blank" rel="noopener">Plausible Analytics</a> to understand how many people visit the site and which pages are popular. Plausible is a privacy-friendly analytics tool that:</p>
+                <ul>
+                    <li>Does not use cookies.</li>
+                    <li>Does not collect personal data or personally identifiable information.</li>
+                    <li>Is fully compliant with GDPR, CCPA, and PECR.</li>
+                    <li>Is open source and independently auditable.</li>
+                    <li>Hosts all data in the EU.</li>
+                </ul>
+                <p>Plausible collects only aggregate, anonymous page view data. No individual visitors are tracked or identified. You can review their full privacy practices at <a href="https://plausible.io/data-policy" target="_blank" rel="noopener">plausible.io/data-policy</a>.</p>
+
+                <h2>Sonic Converter API</h2>
+                <p>The <a href="/api/">Sonic Converter API</a> is a separate, server-side service for developers who need programmatic audio conversion. Unlike the browser-based converter, the API processes files on the server. Here is how we handle data for API usage:</p>
+                <ul>
+                    <li><strong>Temporary files</strong> — Uploaded files are stored temporarily in memory during processing.</li>
+                    <li><strong>Immediate deletion</strong> — Both the uploaded file and the converted output are deleted immediately after the response is sent.</li>
+                    <li><strong>No retention</strong> — We do not retain, archive, or back up any audio files submitted through the API.</li>
+                    <li><strong>API key authentication</strong> — Access requires an API key. We store your API key and associated email for authentication purposes only.</li>
+                    <li><strong>No content logging</strong> — We do not log, inspect, or analyze the content of files submitted through the API.</li>
+                </ul>
+
+                <h2>Third-Party Services</h2>
+                <p>The site uses a small number of third-party services. Each has its own privacy policy:</p>
+                <ul>
+                    <li><strong>Vercel</strong> — Hosts the website. <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener">Vercel Privacy Policy</a></li>
+                    <li><strong>Google Fonts</strong> — Serves the Space Grotesk and JetBrains Mono typefaces. <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Privacy Policy</a></li>
+                    <li><strong>Plausible Analytics</strong> — Privacy-friendly page view analytics. <a href="https://plausible.io/data-policy" target="_blank" rel="noopener">Plausible Data Policy</a></li>
+                    <li><strong>Gumroad</strong> — Processes API key purchases. <a href="https://gumroad.com/privacy" target="_blank" rel="noopener">Gumroad Privacy Policy</a></li>
+                </ul>
+
+                <h2>Children's Privacy</h2>
+                <p>mp3towav.online is not directed at children under the age of 13. We do not knowingly collect any personal information from children. Since the converter does not require any personal data to use, no age-specific data collection occurs.</p>
+
+                <h2>Changes to This Policy</h2>
+                <p>If we make changes to this privacy policy, we will update the "Last updated" date at the top of this page. Since we do not collect email addresses or user accounts, we cannot notify users directly — we encourage you to review this page periodically.</p>
+
+                <h2>Contact</h2>
+                <p>If you have any questions about this privacy policy or how mp3towav.online handles data, contact us at <a href="mailto:privacy@mp3towav.online">privacy@mp3towav.online</a>.</p>
+            </div>
+        </article>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <a href="/">MP3 to WAV Converter</a>
+                <a href="/blog/">Blog</a>
+                <a href="/faq/">FAQ</a>
+                <a href="/api/">API</a>
+                <a href="/privacy/">Privacy</a>
+                <a href="/terms/">Terms</a>
+            </div>
+            <p>&copy; 2026 mp3towav.online — Free, private MP3 to WAV conversion.</p>
+        </div>
+    </footer>
+</body>
+</html>

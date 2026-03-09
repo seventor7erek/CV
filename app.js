@@ -140,6 +140,7 @@ downloadBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     if (lastBlobUrl && lastFileName) {
         triggerDownload(lastBlobUrl, lastFileName);
+        trackEvent('Download', { type: 'wav' });
     }
 });
 
@@ -170,6 +171,7 @@ downloadAllBtn.addEventListener('click', async (e) => {
 
     if (successResults.length === 1) {
         triggerDownload(successResults[0].blobUrl, successResults[0].outputName);
+        trackEvent('Download', { type: 'wav' });
         return;
     }
 
@@ -191,6 +193,7 @@ downloadAllBtn.addEventListener('click', async (e) => {
         const zipUrl = URL.createObjectURL(zipBlob);
         triggerDownload(zipUrl, 'mp3towav-converted.zip');
         URL.revokeObjectURL(zipUrl);
+        trackEvent('Download', { type: 'zip' });
         downloadAllBtn.textContent = 'Download All as ZIP';
         downloadAllBtn.disabled = false;
     } catch (err) {
@@ -378,6 +381,7 @@ async function convertFile(file) {
         // Show result
         dropZone.classList.add('done');
         showPanel(dzDone);
+        trackEvent('Conversion', { type: 'single', bitDepth: String(actualBitDepth), fileCount: '1' });
 
         fileComparison.innerHTML = `
             <div class="file-info">
@@ -510,6 +514,7 @@ async function handleBatch(files) {
     batchActions.classList.remove('hidden');
     batchCount.textContent = `${successCount}/${files.length}`;
     isProcessing = false;
+    trackEvent('Conversion', { type: 'batch', bitDepth: String(selectedBitDepth), fileCount: String(successCount) });
 }
 
 function toggleBatchAudio(blobUrl, btn) {
@@ -593,6 +598,12 @@ function escapeHtml(str) {
     const el = document.createElement('span');
     el.textContent = str;
     return el.innerHTML;
+}
+
+function trackEvent(name, props) {
+    if (typeof plausible !== 'undefined') {
+        plausible(name, { props });
+    }
 }
 
 // --- Cleanup blob URL on page unload ---

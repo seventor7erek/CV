@@ -98,7 +98,7 @@
                             <li>Standard priority</li>
                             <li>Email support</li>
                         </ul>
-                        <a class="gumroad-button pricing-btn pricing-btn-primary" href="https://mp3towav.gumroad.com/l/SONIC_PRO">Subscribe</a>
+                        <a class="pricing-btn pricing-btn-primary" href="https://buy.stripe.com/STRIPE_PRO_LINK" target="_blank" rel="noopener">Subscribe</a>
                     </div>
 
                     <div class="pricing-card pricing-card-featured">
@@ -113,7 +113,7 @@
                             <li>Priority email support</li>
                             <li>Webhook callbacks</li>
                         </ul>
-                        <a class="gumroad-button pricing-btn pricing-btn-primary" href="https://mp3towav.gumroad.com/l/SONIC_BUSINESS">Subscribe</a>
+                        <a class="pricing-btn pricing-btn-primary" href="https://buy.stripe.com/STRIPE_BUSINESS_LINK" target="_blank" rel="noopener">Subscribe</a>
                     </div>
 
                     <div class="pricing-card">
@@ -128,7 +128,7 @@
                             <li>Webhook callbacks</li>
                             <li>Custom output formats</li>
                         </ul>
-                        <a class="gumroad-button pricing-btn pricing-btn-primary" href="https://mp3towav.gumroad.com/l/SONIC_UNLIMITED">Subscribe</a>
+                        <a class="pricing-btn pricing-btn-primary" href="https://buy.stripe.com/STRIPE_UNLIMITED_LINK" target="_blank" rel="noopener">Subscribe</a>
                     </div>
                 </div>
 
@@ -301,13 +301,17 @@ writeFileSync("output.wav", Buffer.from(await res.arrayBuffer()));</code></pre>
                 </div>
 
                 <!--
-                    GUMROAD INTEGRATION:
-                    1. Create subscription products on Gumroad (mp3towav.gumroad.com):
+                    STRIPE INTEGRATION:
+                    1. Create subscription products in Stripe Dashboard:
                        - "Sonic Converter API - Pro" ($9/mo recurring)
                        - "Sonic Converter API - Business" ($19/mo recurring)
                        - "Sonic Converter API - Unlimited" ($49/mo recurring)
-                    2. Get each product's short URL slug (the part after /l/)
-                    3. Replace SONIC_PRO, SONIC_BUSINESS, SONIC_UNLIMITED above
+                    2. Create Payment Links for each product in Stripe Dashboard
+                    3. Replace the placeholder URLs above:
+                       - STRIPE_PRO_LINK → your Pro payment link ID
+                       - STRIPE_BUSINESS_LINK → your Business payment link ID
+                       - STRIPE_UNLIMITED_LINK → your Unlimited payment link ID
+                    4. Payment links open Stripe's hosted checkout page
                 -->
             </div>
         </section>
@@ -328,7 +332,5 @@ writeFileSync("output.wav", Buffer.from(await res.arrayBuffer()));</code></pre>
         </div>
     </footer>
 
-    <!-- Gumroad Overlay Checkout -->
-    <script src="https://gumroad.com/js/gumroad.js"></script>
 </body>
 </html>

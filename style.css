@@ -487,6 +487,54 @@ main {
     background: var(--surface-2);
 }
 
+/* ---- Bit Depth Selector ---- */
+.bit-depth-selector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.bit-depth-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.bit-depth-options {
+    display: flex;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.bit-depth-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.4rem 0.75rem;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.bit-depth-btn:hover {
+    color: var(--text);
+}
+
+.bit-depth-btn.active {
+    background: var(--primary);
+    color: #fff;
+}
+
+.bit-depth-btn + .bit-depth-btn {
+    border-left: 1px solid var(--border);
+}
 
 /* ---- Footer ---- */
 footer {

@@ -13,6 +13,7 @@ let lastFileName = null;
 let isProcessing = false;
 let wasmReady = false;
 let wasmModule = null;
+let selectedBitDepth = 16;
 
 // --- DOM ---
 const dropZone = document.getElementById('dropZone');
@@ -31,12 +32,16 @@ const downloadBtn = document.getElementById('downloadBtn');
 const convertAnotherBtn = document.getElementById('convertAnotherBtn');
 const retryBtn = document.getElementById('retryBtn');
 const errorText = document.getElementById('errorText');
+const bitDepthSelector = document.getElementById('bitDepthSelector');
 
 // --- Initialize WASM after page load (doesn't block tab spinner) ---
 let wasmInitResolve;
 const wasmInit = new Promise(r => { wasmInitResolve = r; });
 
 window.addEventListener('load', () => {
+    const dropLimit = document.querySelector('.drop-limit');
+    if (dropLimit) dropLimit.textContent = 'Loading audio engine...';
+
     (async () => {
         try {
             const mod = await import('./sonic_converter.js');
@@ -47,6 +52,7 @@ window.addEventListener('load', () => {
         } catch (err) {
             console.warn('WASM init failed, will use Web Audio API fallback:', err.message);
         }
+        if (dropLimit) dropLimit.textContent = 'MP3 files up to 100 MB';
         wasmInitResolve();
     })();
 });
@@ -118,6 +124,15 @@ convertAnotherBtn.addEventListener('click', (e) => {
 retryBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     reset();
+});
+
+// --- Bit Depth Selector ---
+bitDepthSelector.addEventListener('click', (e) => {
+    const btn = e.target.closest('.bit-depth-btn');
+    if (!btn) return;
+    bitDepthSelector.querySelectorAll('.bit-depth-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedBitDepth = parseInt(btn.dataset.depth, 10);
 });
 
 // --- Prevent default drag on page ---
@@ -218,13 +233,16 @@ async function convertFile(file) {
             progressText.textContent = 'Converting (Sonic Engine)...';
             progressFill.style.width = '50%';
 
-            const wavBytes = wasmModule.convertMp3ToWav(mp3Bytes);
+            const wavBytes = wasmModule.convertMp3ToWavWithDepth(mp3Bytes, selectedBitDepth);
             wavBuffer = wavBytes.buffer;
 
             progressFill.style.width = '90%';
             progressText.textContent = 'Finalizing...';
         } else {
             // Fallback: Web Audio API
+            if (selectedBitDepth !== 16) {
+                console.warn('Web Audio fallback only supports 16-bit. Using 16-bit output.');
+            }
             progressText.textContent = 'Converting (Web Audio)...';
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer.slice(0));
@@ -250,9 +268,6 @@ async function convertFile(file) {
         progressFill.style.width = '100%';
         progressText.textContent = '100%';
 
-        // Auto-download
-        triggerDownload(lastBlobUrl, lastFileName);
-
         // Show result
         dropZone.classList.add('done');
         showPanel(dzDone);
@@ -267,7 +282,7 @@ async function convertFile(file) {
             <div class="file-info">
                 <span class="file-label">Output</span>
                 <span class="file-name">${escapeHtml(outputName)}</span>
-                <span class="file-size">${formatSize(blob.size)}</span>
+                <span class="file-size">${formatSize(blob.size)} · ${selectedBitDepth}-bit</span>
             </div>
         `;
 
@@ -324,3 +339,11 @@ function escapeHtml(str) {
     el.textContent = str;
     return el.innerHTML;
 }
+
+// --- Cleanup blob URL on page unload ---
+window.addEventListener('beforeunload', () => {
+    if (lastBlobUrl) {
+        URL.revokeObjectURL(lastBlobUrl);
+        lastBlobUrl = null;
+    }
+});

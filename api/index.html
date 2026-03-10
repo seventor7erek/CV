@@ -330,5 +330,43 @@ writeFileSync("output.wav", Buffer.from(await res.arrayBuffer()));</code></pre>
         </div>
     </footer>
 
+    <script>
+    function copyText(text, btn) {
+        function onSuccess() {
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            setTimeout(function() {
+                btn.textContent = 'Copy';
+                btn.classList.remove('copied');
+            }, 2000);
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(onSuccess).catch(function() {
+                fallbackCopy(text, btn, onSuccess);
+            });
+        } else {
+            fallbackCopy(text, btn, onSuccess);
+        }
+    }
+    function fallbackCopy(text, btn, onSuccess) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.cssText = 'position:fixed;left:-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); onSuccess(); } catch (e) {}
+        document.body.removeChild(ta);
+    }
+    document.querySelectorAll('.code-block').forEach(function(block) {
+        var btn = document.createElement('button');
+        btn.className = 'code-copy';
+        btn.textContent = 'Copy';
+        btn.addEventListener('click', function() {
+            copyText(block.querySelector('code').textContent, btn);
+        });
+        block.appendChild(btn);
+    });
+    </script>
+
 </body>
 </html>

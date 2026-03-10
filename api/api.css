@@ -196,6 +196,7 @@
     border-radius: 12px;
     margin-bottom: 1.5rem;
     overflow: hidden;
+    position: relative;
 }
 
 .code-label {
@@ -207,6 +208,31 @@
     text-transform: uppercase;
     letter-spacing: 0.06em;
     border-bottom: 1px solid var(--border);
+}
+
+.code-copy {
+    position: absolute;
+    top: 0.35rem;
+    right: 0.5rem;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+    cursor: pointer;
+    font-family: var(--font-main);
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.code-copy:hover {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.code-copy.copied {
+    color: #22c55e;
+    border-color: #22c55e;
 }
 
 .code-block pre {

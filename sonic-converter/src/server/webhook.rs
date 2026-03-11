@@ -1,3 +1,7 @@
+// DISABLED: Webhook functionality disabled — site operates on ad revenue only.
+// To re-enable: remove the /* ... */ block comment wrapping this file.
+
+/*
 /// Webhook delivery for Sonic Converter API.
 ///
 /// Business and Unlimited tiers can register webhook URLs to receive
@@ -89,3 +93,4 @@ pub async fn deliver(
     error!(url, error = %last_err, "Webhook delivery failed after 3 attempts");
     Err(format!("Webhook delivery failed: {last_err}"))
 }
+*/

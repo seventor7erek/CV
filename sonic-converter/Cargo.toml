@@ -22,7 +22,9 @@ default = ["parallel", "mmap"]
 parallel = ["dep:rayon"]
 mmap = ["dep:memmap2"]
 wasm = ["dep:wasm-bindgen", "dep:js-sys", "dep:web-sys", "dep:console_error_panic_hook"]
-server = ["dep:axum", "dep:tokio", "dep:tower", "dep:tower-http", "dep:serde", "dep:serde_json", "dep:uuid", "dep:tempfile", "dep:tokio-util", "dep:tracing", "dep:tracing-subscriber", "dep:governor", "dep:dashmap", "dep:libsql", "dep:sha2", "dep:chrono", "dep:hmac", "dep:hex", "dep:reqwest"]
+# DISABLED: Full server feature with DB deps. Using minimal server feature instead.
+# server = ["dep:axum", "dep:tokio", "dep:tower", "dep:tower-http", "dep:serde", "dep:serde_json", "dep:uuid", "dep:tempfile", "dep:tokio-util", "dep:tracing", "dep:tracing-subscriber", "dep:governor", "dep:dashmap", "dep:libsql", "dep:sha2", "dep:chrono", "dep:hmac", "dep:hex", "dep:reqwest"]
+server = ["dep:axum", "dep:tokio", "dep:tower", "dep:tower-http", "dep:serde", "dep:serde_json", "dep:uuid", "dep:tracing", "dep:tracing-subscriber"]
 
 [dependencies]
 # Core: MP3 decoding

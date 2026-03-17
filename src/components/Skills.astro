@@ -25,7 +25,13 @@ import { skills } from "../data/skills";
 </section>
 
 <style is:global>
+  .skill-chip {
+    transition: box-shadow 0.2s, background-color 0.2s, backdrop-filter 0.2s;
+  }
   .skill-chip:hover {
+    background-color: rgba(59, 130, 246, 0.08);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     box-shadow: 0 0 12px var(--accent-glow);
   }
 </style>

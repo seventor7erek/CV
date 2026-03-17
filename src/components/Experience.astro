@@ -14,7 +14,7 @@ import { experience } from "../data/experience";
         {experience.map((entry) => (
           <div data-timeline-entry class="gsap-reveal relative">
             <!-- Dot -->
-            <div data-timeline-dot class="gsap-reveal absolute -left-10 top-1 hidden h-2 w-2 rounded-full bg-accent md:block"></div>
+            <div data-timeline-dot class="gsap-reveal timeline-dot-glass absolute -left-10 top-1 hidden h-3 w-3 rounded-full md:block"></div>
             <span class="text-sm text-text-muted">{entry.period}</span>
             <h3 class="mt-1 font-semibold text-text-primary">{entry.company}</h3>
             <span class="text-sm text-accent">{entry.role}</span>
@@ -25,3 +25,12 @@ import { experience } from "../data/experience";
     </div>
   </div>
 </section>
+
+<style is:global>
+  .timeline-dot-glass {
+    background: rgba(59, 130, 246, 0.3);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(59, 130, 246, 0.4);
+  }
+</style>

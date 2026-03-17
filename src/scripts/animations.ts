@@ -38,10 +38,15 @@ function initAnimations() {
       "[data-hero-cta]",
       { opacity: 1, y: 0, duration: 1, ease: "power2.out" },
       "-=0.8"
+    )
+    .to(
+      "[data-hero-video]",
+      { opacity: 1, y: 0, duration: 1, ease: "power2.out" },
+      "-=0.8"
     );
 
   // Generic section reveals — About, Projects, Contact
-  ["#about", "#projects", "#contact"].forEach((sectionId) => {
+  ["#about", "#projects", "#cta"].forEach((sectionId) => {
     const section = document.querySelector(sectionId);
     if (!section) return;
     const reveals = section.querySelectorAll("[data-reveal]");

@@ -7,13 +7,6 @@ export interface Experience {
 
 export const experience: Experience[] = [
   {
-    company: "Emirates Airlines",
-    role: "Airport Services Agent",
-    period: "2025 — Present",
-    description:
-      "Premium passenger experience at Dubai International Terminal 3. Managing VIP, Marhaba, and unaccompanied minor services.",
-  },
-  {
     company: "Magic Touch Electronics",
     role: "Freelance Short-Form Video Content Creator",
     period: "2024 — 2025",

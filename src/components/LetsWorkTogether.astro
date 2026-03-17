@@ -1,0 +1,215 @@
+<section id="cta" class="px-6 py-32">
+  <div class="cta-wrapper mx-auto max-w-6xl text-center">
+
+    <!-- DEFAULT STATE -->
+    <div id="cta-default">
+      <!-- Availability badge -->
+      <div data-reveal class="gsap-reveal mb-8 inline-flex items-center gap-2">
+        <span class="cta-pulse-dot"></span>
+        <span class="font-mono text-sm uppercase tracking-wide text-text-muted">Available for projects</span>
+      </div>
+
+      <!-- Headline -->
+      <h2 data-reveal class="gsap-reveal cta-headline mb-8 text-[clamp(2.5rem,6vw,4.5rem)] font-bold leading-[1.1] text-text-primary">
+        Let's work<br/>together
+      </h2>
+
+      <!-- Decorative lines + arrow button -->
+      <div data-reveal class="gsap-reveal cta-trigger-row mb-10 flex items-center justify-center gap-6">
+        <span class="cta-line"></span>
+        <button id="cta-trigger" class="cta-arrow-btn" aria-label="Get in touch">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 17L17 7M17 7H7M17 7V17"/>
+          </svg>
+        </button>
+        <span class="cta-line"></span>
+      </div>
+
+      <!-- Paragraph -->
+      <p data-reveal class="gsap-reveal mx-auto max-w-md text-text-muted">
+        Have a project in mind? I'd love to hear about it. Let's create something exceptional together.
+      </p>
+    </div>
+
+    <!-- SUCCESS STATE -->
+    <div id="cta-success" class="cta-success-hidden">
+      <h2 class="mb-8 text-[clamp(2.5rem,6vw,4.5rem)] font-bold leading-[1.1] text-text-primary">
+        Perfect<br/>Let's talk
+      </h2>
+
+      <a
+        href="https://wa.me/971544117716?text=Hey!%20I%20just%20checked%20out%20your%20portfolio%20and%20loved%20the%20design.%20I%27d%20love%20to%20discuss%20working%20together%20%F0%9F%A4%9D"
+        class="cta-whatsapp-btn"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>
+        </svg>
+        Chat on WhatsApp
+      </a>
+
+      <p class="mt-4 text-sm text-text-muted">Quick intro · No commitment</p>
+    </div>
+
+  </div>
+</section>
+
+<style is:global>
+  /* Wrapper needs relative for absolute success state */
+  .cta-wrapper {
+    position: relative;
+    min-height: 320px;
+  }
+
+  /* Pulsing availability dot */
+  .cta-pulse-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: cta-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes cta-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.4); }
+  }
+
+  /* Headline hover lift */
+  .cta-headline {
+    transition: transform 300ms ease;
+    cursor: default;
+  }
+
+  .cta-headline:hover {
+    transform: translateY(-4px);
+  }
+
+  /* Decorative lines */
+  .cta-line {
+    display: block;
+    height: 1px;
+    width: 60px;
+    background: rgba(255, 255, 255, 0.1);
+    transition: width 300ms ease;
+  }
+
+  .cta-trigger-row:hover .cta-line {
+    width: 100px;
+  }
+
+  /* Arrow button */
+  .cta-arrow-btn {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: transparent;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 300ms ease, color 300ms ease, border-color 300ms ease;
+    flex-shrink: 0;
+  }
+
+  .cta-arrow-btn:hover {
+    background: var(--text-primary);
+    color: var(--bg-base);
+    border-color: var(--text-primary);
+  }
+
+  /* Success state — hidden by default */
+  .cta-success-hidden {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* WhatsApp button */
+  .cta-whatsapp-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 28px;
+    border: 1px solid var(--text-primary);
+    border-radius: 9999px;
+    color: var(--text-primary);
+    background: transparent;
+    font-size: 1rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 300ms ease, color 300ms ease;
+  }
+
+  .cta-whatsapp-btn:hover {
+    background: var(--text-primary);
+    color: var(--bg-base);
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .cta-pulse-dot {
+      animation: none;
+    }
+
+    .cta-headline:hover {
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  import gsap from "gsap";
+
+  const trigger = document.getElementById("cta-trigger");
+  const defaultState = document.getElementById("cta-default");
+  const successState = document.getElementById("cta-success");
+
+  if (trigger && defaultState && successState) {
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+    trigger.addEventListener("click", () => {
+      if (prefersReducedMotion) {
+        defaultState.style.display = "none";
+        successState.classList.remove("cta-success-hidden");
+        successState.style.opacity = "1";
+        successState.style.pointerEvents = "auto";
+        return;
+      }
+
+      gsap.to(defaultState, {
+        opacity: 0,
+        y: -20,
+        duration: 0.4,
+        ease: "power2.in",
+        onComplete: () => {
+          defaultState.style.display = "none";
+          successState.classList.remove("cta-success-hidden");
+          gsap.fromTo(
+            successState,
+            { opacity: 0, y: 20 },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.5,
+              ease: "power2.out",
+              onStart: () => {
+                successState.style.pointerEvents = "auto";
+              },
+            }
+          );
+        },
+      });
+    });
+  }
+</script>

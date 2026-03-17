@@ -3,11 +3,11 @@
 /* --- Font Faces --- */
 
 @font-face {
-  font-family: "Inter";
+  font-family: "Satoshi";
   font-style: normal;
-  font-weight: 100 900;
+  font-weight: 300 900;
   font-display: swap;
-  src: url("/fonts/inter-variable.woff2") format("woff2");
+  src: url("/fonts/satoshi-variable.woff2") format("woff2");
 }
 
 @font-face {
@@ -28,7 +28,7 @@
   --text-primary: #f1f1f3;
   --text-secondary: #9ca3af;
 
-  --font-sans: "Inter", system-ui, sans-serif;
+  --font-sans: "Satoshi", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
   --glass-bg: rgba(18, 18, 26, 0.6);
@@ -47,7 +47,7 @@
   --color-glass-bg: rgba(18, 18, 26, 0.6);
   --color-glass-border: rgba(255, 255, 255, 0.05);
 
-  --font-sans: "Inter", system-ui, sans-serif;
+  --font-sans: "Satoshi", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
 

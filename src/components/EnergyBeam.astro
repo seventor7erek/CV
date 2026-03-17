@@ -68,9 +68,10 @@ const { projectId = "hRFfUymDGOHwtFe7evR2" } = Astro.props;
   const section = document.getElementById("energy-beam");
   if (!section) throw new Error("energy-beam section not found");
 
+  const beamCanvas = section.querySelector("[data-us-project]") as HTMLElement | null;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  if (!reducedMotion) {
+  if (!reducedMotion && beamCanvas) {
     let loaded = false;
 
     const observer = new IntersectionObserver(
@@ -81,12 +82,25 @@ const { projectId = "hRFfUymDGOHwtFe7evR2" } = Astro.props;
 
           const script = document.createElement("script");
           script.src =
-            "https://cdn.jsdelivr.net/gh/AcmeSoftwareLLC/unicorn-studio-cdn@v1.5.2/dist/unicornStudio.umd.js";
+            "https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.5.2/dist/unicornStudio.umd.js";
           script.async = true;
 
           script.onload = () => {
             if (window.UnicornStudio) {
-              window.UnicornStudio.init();
+              window.UnicornStudio.addScene({
+                elementId: beamCanvas.id || undefined,
+                element: beamCanvas,
+                projectId: beamCanvas.dataset.usProject!,
+                scale: parseFloat(beamCanvas.dataset.usScale || "1"),
+                dpi: parseFloat(beamCanvas.dataset.usDpi || "1.5"),
+                fps: 60,
+                interactivity: {
+                  mouse: { disableMobile: false },
+                },
+              }).catch(() => {
+                // Fallback: try generic init
+                window.UnicornStudio!.init();
+              });
             }
           };
 
@@ -102,7 +116,10 @@ const { projectId = "hRFfUymDGOHwtFe7evR2" } = Astro.props;
   // Type declaration for the SDK
   declare global {
     interface Window {
-      UnicornStudio?: { init: () => void };
+      UnicornStudio?: {
+        init: () => void;
+        addScene: (opts: Record<string, unknown>) => Promise<unknown>;
+      };
     }
   }
 </script>

@@ -7,28 +7,27 @@
 
 ## Design Constraints (STRICT)
 - Dark theme ONLY. Base bg: #0A0A0F
-- ONE accent color: #3B82F6 (blue) — used sparingly
-- Blur/glass effect on navbar + select elements only
+- ONE accent color: #EF4444 (red) — used sparingly
+- iOS-style frosted glass on all interactive surfaces
 - Whitespace: generous. Sections padded 128px+ vertically
 - Typography: Satoshi + JetBrains Mono only
-- NO gradients (except subtle blue glow blobs)
+- NO gradients (except subtle red glow blobs)
 - NO box shadows
 - NO border-radius above 12px
-- NO cards with visible borders (use bg opacity instead)
 - NO progress bars for skills
 - NO generic AI aesthetic (no purple-pink gradients, 
-  no floating 3D objects, no glassmorphism on everything)
+  no floating 3D objects)
 
-## Glass Effect Values
-background: rgba(18, 18, 26, 0.6)
-backdrop-filter: blur(20px)
-border: 1px solid rgba(255, 255, 255, 0.05)
+## Glass Effect Values (iOS-style)
+background: rgba(255, 255, 255, 0.04)
+backdrop-filter: blur(40px) saturate(180%)
+border: 0.5px solid rgba(255, 255, 255, 0.08)
 
 ## Color Tokens
 - --bg-base: #0A0A0F
 - --bg-surface: #12121A
-- --accent: #3B82F6
-- --accent-glow: rgba(59, 130, 246, 0.15)
+- --accent: #EF4444
+- --accent-glow: rgba(239, 68, 68, 0.15)
 - --text-primary: #F1F1F3
 - --text-secondary: #9CA3AF (mapped as --color-text-muted in Tailwind @theme)
 

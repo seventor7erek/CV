@@ -1,13 +1,24 @@
 <section id="about" class="px-6 py-32">
   <div class="mx-auto max-w-6xl">
     <h2 data-reveal class="gsap-reveal mb-12 text-[2rem] font-semibold text-text-primary">About</h2>
-    <div class="max-w-[640px] space-y-6">
-      <p data-reveal class="gsap-reveal text-text-muted">
-        Dubai-based content creator and on-camera talent with a track record producing viral short-form video ads — including a reel that reached 302,000+ views organically. I handle the full production cycle solo: concept, scripting, filming, and editing.
-      </p>
-      <p data-reveal class="gsap-reveal text-text-muted">
-        Currently an Airport Services Agent at Emirates Airlines, Terminal 3. Outside of that, I produce dark cinematic music under 7EREK, build web tools like mp3towav.online, and co-founded SEVENTOR — a luxury events company in Dubai.
-      </p>
+    <div class="about-glass max-w-[680px] rounded-xl p-8 md:p-10">
+      <div class="space-y-6">
+        <p data-reveal class="gsap-reveal text-text-muted">
+          I make things people watch. 302,000+ organic views on a single reel — concept to cut, all me. Short-form video ads that sell, produced solo from script to screen.
+        </p>
+        <p data-reveal class="gsap-reveal text-text-muted">
+          By day, Airport Services at Emirates Airlines, Terminal 3. Outside of that: dark cinematic music under <span class="text-text-primary font-medium">7EREK</span>, the web tool <a href="https://mp3towav.online" target="_blank" rel="noopener noreferrer" class="text-accent transition-opacity duration-200 hover:opacity-80">mp3towav.online</a>, and <span class="text-text-primary font-medium">SEVENTOR</span> — a luxury events company I co-founded in Dubai.
+        </p>
+      </div>
     </div>
   </div>
 </section>
+
+<style is:global>
+  .about-glass {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 0.5px solid rgba(255, 255, 255, 0.08);
+  }
+</style>

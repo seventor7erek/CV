@@ -162,8 +162,10 @@ for (const item of work) {
 
 <style is:global>
   .work-photo-container {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.04);
+    border: 0.5px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
   }
 
   .work-photo {
@@ -256,8 +258,10 @@ for (const item of work) {
     max-height: 65vh;
     border-radius: 12px;
     overflow: hidden;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.04);
+    border: 0.5px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -304,16 +308,16 @@ for (const item of work) {
     font-size: 13px;
     font-weight: 500;
     color: var(--text-primary);
-    background: rgba(59, 130, 246, 0.12);
-    border: 1px solid rgba(59, 130, 246, 0.2);
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.2);
     border-radius: 8px;
     text-decoration: none;
     transition: background 300ms ease, border-color 300ms ease;
   }
 
   .work-lightbox-link:hover {
-    background: rgba(59, 130, 246, 0.2);
-    border-color: rgba(59, 130, 246, 0.35);
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.35);
   }
 
   .work-lightbox-link[href="#"] {
@@ -329,8 +333,10 @@ for (const item of work) {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+    border: 0.5px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
     border-radius: 8px;
     color: var(--text-primary);
     cursor: pointer;

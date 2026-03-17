@@ -129,7 +129,7 @@ export function init(): void {
       const alpha = Math.min((1 - Math.abs((p.age / p.life) - 0.5) * 2) * MAX_ALPHA, MAX_ALPHA);
       if (alpha <= 0) continue;
 
-      ctx!.fillStyle = `rgba(59, 130, 246, ${alpha})`;
+      ctx!.fillStyle = `rgba(239, 68, 68, ${alpha})`;
       ctx!.fillRect(p.x, p.y, 1, 1);
     }
 

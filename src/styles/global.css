@@ -23,16 +23,17 @@
 :root {
   --bg-base: #0a0a0f;
   --bg-surface: #12121a;
-  --accent: #3b82f6;
-  --accent-glow: rgba(59, 130, 246, 0.15);
+  --accent: #ef4444;
+  --accent-glow: rgba(239, 68, 68, 0.15);
   --text-primary: #f1f1f3;
   --text-secondary: #9ca3af;
 
   --font-sans: "Satoshi", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
-  --glass-bg: rgba(18, 18, 26, 0.6);
-  --glass-border: rgba(255, 255, 255, 0.05);
+  --glass-bg: rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-blur: blur(40px) saturate(180%);
 }
 
 /* --- Tailwind Theme --- */
@@ -40,12 +41,12 @@
 @theme {
   --color-bg-base: #0a0a0f;
   --color-bg-surface: #12121a;
-  --color-accent: #3b82f6;
-  --color-accent-glow: rgba(59, 130, 246, 0.15);
+  --color-accent: #ef4444;
+  --color-accent-glow: rgba(239, 68, 68, 0.15);
   --color-text-primary: #f1f1f3;
   --color-text-muted: #9ca3af;
-  --color-glass-bg: rgba(18, 18, 26, 0.6);
-  --color-glass-border: rgba(255, 255, 255, 0.05);
+  --color-glass-bg: rgba(255, 255, 255, 0.04);
+  --color-glass-border: rgba(255, 255, 255, 0.08);
 
   --font-sans: "Satoshi", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;

@@ -1,12 +1,22 @@
+---
+interface Props {
+  projectId?: string;
+}
+
+const { projectId = "hRFfUymDGOHwtFe7evR2" } = Astro.props;
+---
+
 <section id="energy-beam" class="energy-beam-section">
   <!-- Top fade: blends into the section above -->
   <div class="energy-beam-fade energy-beam-fade-top"></div>
 
-  <!-- Black hole canvas -->
-  <canvas id="black-hole-canvas" class="energy-beam-canvas"></canvas>
-
-  <!-- Closing tag easter egg -->
-  <span class="energy-beam-tag font-mono">&lt;/&gt;</span>
+  <!-- Unicorn Studio canvas container -->
+  <div
+    data-us-project={projectId}
+    data-us-scale="1"
+    data-us-dpi="1.5"
+    class="energy-beam-canvas"
+  ></div>
 
   <!-- Bottom fade: blends into footer below -->
   <div class="energy-beam-fade energy-beam-fade-bottom"></div>
@@ -22,28 +32,11 @@
   }
 
   .energy-beam-canvas {
-    position: absolute;
-    inset: 0;
     width: 100%;
     height: 100%;
   }
 
-  /* Closing tag overlay */
-  .energy-beam-tag {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1;
-    font-size: clamp(1.5rem, 3vw, 2.5rem);
-    color: var(--accent);
-    opacity: 0.06;
-    pointer-events: none;
-    user-select: none;
-    letter-spacing: 0.15em;
-  }
-
-  /* Gradient fades so the vortex bleeds into surrounding sections */
+  /* Gradient fades so the beam bleeds into surrounding sections */
   .energy-beam-fade {
     position: absolute;
     left: 0;
@@ -63,19 +56,70 @@
     background: linear-gradient(to top, var(--bg-base), transparent);
   }
 
-  /* Reduced motion: static glow only */
+  /* Reduced motion: hide entirely */
   @media (prefers-reduced-motion: reduce) {
-    .energy-beam-canvas {
+    .energy-beam-section {
       display: none;
     }
   }
 </style>
 
 <script>
-  import { init } from "../scripts/black-hole";
+  const section = document.getElementById("energy-beam");
+  if (!section) throw new Error("energy-beam section not found");
 
-  const canvas = document.getElementById("black-hole-canvas") as HTMLCanvasElement | null;
-  if (canvas) {
-    init(canvas);
+  const beamCanvas = section.querySelector("[data-us-project]") as HTMLElement | null;
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (!reducedMotion && beamCanvas) {
+    let loaded = false;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !loaded) {
+          loaded = true;
+          observer.disconnect();
+
+          const script = document.createElement("script");
+          script.src =
+            "https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.5.2/dist/unicornStudio.umd.js";
+          script.async = true;
+
+          script.onload = () => {
+            if (window.UnicornStudio) {
+              window.UnicornStudio.addScene({
+                elementId: beamCanvas.id || undefined,
+                element: beamCanvas,
+                projectId: beamCanvas.dataset.usProject!,
+                scale: parseFloat(beamCanvas.dataset.usScale || "1"),
+                dpi: parseFloat(beamCanvas.dataset.usDpi || "1.5"),
+                fps: 60,
+                interactivity: {
+                  mouse: { disableMobile: false },
+                },
+              }).catch(() => {
+                // Fallback: try generic init
+                window.UnicornStudio!.init();
+              });
+            }
+          };
+
+          document.head.appendChild(script);
+        }
+      },
+      { rootMargin: "200px" }
+    );
+
+    observer.observe(section);
+  }
+
+  // Type declaration for the SDK
+  declare global {
+    interface Window {
+      UnicornStudio?: {
+        init: () => void;
+        addScene: (opts: Record<string, unknown>) => Promise<unknown>;
+      };
+    }
   }
 </script>

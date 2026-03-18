@@ -1,5 +1,7 @@
 // Interactive 3D Globe — Canvas 2D renderer
-// Tech Stack skills as markers on a rotating sphere with full physics.
+// Tech Stack skills as markers on a rotating sphere.
+// Physics ported faithfully from the original React canvas globe component,
+// with momentum inertia added on top.
 
 interface Marker {
   lat: number;
@@ -79,45 +81,40 @@ const TECH_CONNECTIONS: Connection[] = [
   { from: [58, 15], to: [45, 55] },          // iPhone Filming ↔ Gimbal Operation
 ];
 
-// ── Math helpers ──
+// ── Math (matches original exactly) ──
 
-function latLngToXYZ(lat: number, lng: number, radius: number): [number, number, number] {
+function latLngToXYZ(lat: number, lng: number, r: number): [number, number, number] {
   const phi = ((90 - lat) * Math.PI) / 180;
   const theta = ((lng + 180) * Math.PI) / 180;
   return [
-    -(radius * Math.sin(phi) * Math.cos(theta)),
-    radius * Math.cos(phi),
-    radius * Math.sin(phi) * Math.sin(theta),
+    -(r * Math.sin(phi) * Math.cos(theta)),
+    r * Math.cos(phi),
+    r * Math.sin(phi) * Math.sin(theta),
   ];
 }
 
-function rotY3(x: number, y: number, z: number, angle: number): [number, number, number] {
-  const cos = Math.cos(angle);
-  const sin = Math.sin(angle);
-  return [x * cos + z * sin, y, -x * sin + z * cos];
+function rotateY(x: number, y: number, z: number, a: number): [number, number, number] {
+  const c = Math.cos(a), s = Math.sin(a);
+  return [x * c + z * s, y, -x * s + z * c];
 }
 
-function rotX3(x: number, y: number, z: number, angle: number): [number, number, number] {
-  const cos = Math.cos(angle);
-  const sin = Math.sin(angle);
-  return [x, y * cos - z * sin, y * sin + z * cos];
+function rotateX(x: number, y: number, z: number, a: number): [number, number, number] {
+  const c = Math.cos(a), s = Math.sin(a);
+  return [x, y * c - z * s, y * s + z * c];
 }
 
-function projectPoint(
-  x: number, y: number, z: number,
-  cx: number, cy: number, fov: number
-): [number, number, number] {
+function project(x: number, y: number, z: number, cx: number, cy: number, fov: number): [number, number] {
   const scale = fov / (fov + z);
-  return [x * scale + cx, y * scale + cy, z];
+  return [x * scale + cx, y * scale + cy];
 }
 
-// ── Fibonacci sphere dot generation ──
+// ── Fibonacci sphere ──
 
 function generateDots(count: number): [number, number, number][] {
   const dots: [number, number, number][] = [];
-  const goldenRatio = (1 + Math.sqrt(5)) / 2;
+  const gr = (1 + Math.sqrt(5)) / 2;
   for (let i = 0; i < count; i++) {
-    const theta = (2 * Math.PI * i) / goldenRatio;
+    const theta = (2 * Math.PI * i) / gr;
     const phi = Math.acos(1 - (2 * (i + 0.5)) / count);
     dots.push([
       Math.cos(theta) * Math.sin(phi),
@@ -128,47 +125,43 @@ function generateDots(count: number): [number, number, number][] {
   return dots;
 }
 
-// ── Globe initializer ──
+// ── Init ──
 
 export function initGlobe(canvas: HTMLCanvasElement): () => void {
-  const markers = TECH_MARKERS;
-  const connections = TECH_CONNECTIONS;
-
   const ctx = canvas.getContext("2d");
   if (!ctx) return () => {};
 
   const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  // ── Physics state ──
+  // Physics state
   let rotYVal = 0.4;
   let rotXVal = 0.3;
-  let velocityY = 0;        // drag momentum
-  let velocityX = 0;
+  let velY = 0;
+  let velX = 0;
   let time = 0;
   let animId = 0;
 
-  // Drag state
-  let dragActive = false;
-  let dragStartX = 0;
-  let dragStartY = 0;
-  let dragStartRotY = 0;
-  let dragStartRotX = 0;
-  let lastPointerX = 0;
-  let lastPointerY = 0;
-  let lastPointerTime = 0;
+  // Drag
+  let dragging = false;
+  let dragOriginX = 0;
+  let dragOriginY = 0;
+  let dragRotY0 = 0;
+  let dragRotX0 = 0;
+  let prevPtrX = 0;
+  let prevPtrY = 0;
+  let prevPtrT = 0;
 
-  // ── Colors ──
-  const dotColorBase = "rgba(239, 68, 68, ";     // #EF4444
-  const arcColor = "rgba(239, 68, 68, 0.4)";
-  const markerDotColor = "rgba(239, 68, 68, 1)";
-  // Labels: bright white for visibility
-  const labelColor = (a: number) => `rgba(241, 241, 243, ${a})`;
-  const pulseColor = (a: number) => `rgba(239, 68, 68, ${a})`;
+  // Tuning
+  const AUTO_SPEED = 0.002;
+  const DRAG_SENS = 0.005;
+  const FRICTION = 0.95;
+  const VEL_FLOOR = 0.0001;
+  const VEL_CAP_Y = 0.06;
+  const VEL_CAP_X = 0.03;
+  const EWMA = 0.3; // smoothing factor for velocity (0 = no update, 1 = instant)
 
+  // Dots
   const dots = generateDots(1200);
-  const autoRotateSpeed = 0.002;
-  const friction = 0.95;        // momentum decay
-  const minVelocity = 0.0001;   // threshold to stop momentum
 
   function draw() {
     if (!ctx) return;
@@ -177,172 +170,160 @@ export function initGlobe(canvas: HTMLCanvasElement): () => void {
     const w = canvas.clientWidth;
     const h = canvas.clientHeight;
 
-    if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
-      canvas.width = w * dpr;
-      canvas.height = h * dpr;
-    }
-
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // Resize backing store (matches original pattern)
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    ctx.scale(dpr, dpr);
 
     const cx = w / 2;
     const cy = h / 2;
     const radius = Math.min(w, h) * 0.42;
-    const fov = 600;
 
-    // ── Physics: momentum + auto-rotate ──
-    if (!dragActive) {
-      // Apply momentum from drag release
-      if (Math.abs(velocityY) > minVelocity || Math.abs(velocityX) > minVelocity) {
-        rotYVal += velocityY;
-        rotXVal += velocityX;
-        rotXVal = Math.max(-1.2, Math.min(1.2, rotXVal));
-        velocityY *= friction;
-        velocityX *= friction;
-        if (Math.abs(velocityY) < minVelocity) velocityY = 0;
-        if (Math.abs(velocityX) < minVelocity) velocityX = 0;
+    // FOV scales with radius to keep perspective ratio constant.
+    // Original: fov=600, radius≈228 → ratio 2.63
+    const fov = radius * 2.63;
+
+    // ── Physics tick ──
+    if (!dragging) {
+      if (Math.abs(velY) > VEL_FLOOR || Math.abs(velX) > VEL_FLOOR) {
+        rotYVal += velY;
+        rotXVal += velX;
+        rotXVal = Math.max(-1, Math.min(1, rotXVal));
+        velY *= FRICTION;
+        velX *= FRICTION;
+        if (Math.abs(velY) < VEL_FLOOR) velY = 0;
+        if (Math.abs(velX) < VEL_FLOOR) velX = 0;
       } else {
-        // Auto rotate when momentum has died
-        rotYVal += autoRotateSpeed;
+        rotYVal += AUTO_SPEED;
       }
     }
 
     time += 0.015;
-
     ctx.clearRect(0, 0, w, h);
 
     // ── Outer glow ──
-    const glowGrad = ctx.createRadialGradient(cx, cy, radius * 0.8, cx, cy, radius * 1.6);
-    glowGrad.addColorStop(0, "rgba(239, 68, 68, 0.04)");
-    glowGrad.addColorStop(1, "rgba(239, 68, 68, 0)");
-    ctx.fillStyle = glowGrad;
+    const glow = ctx.createRadialGradient(cx, cy, radius * 0.8, cx, cy, radius * 1.5);
+    glow.addColorStop(0, "rgba(239, 68, 68, 0.03)");
+    glow.addColorStop(1, "rgba(239, 68, 68, 0)");
+    ctx.fillStyle = glow;
     ctx.fillRect(0, 0, w, h);
 
-    // ── Globe outline ──
+    // ── Globe ring ──
     ctx.beginPath();
     ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-    ctx.strokeStyle = "rgba(239, 68, 68, 0.08)";
+    ctx.strokeStyle = "rgba(239, 68, 68, 0.06)";
     ctx.lineWidth = 1;
     ctx.stroke();
 
     const ry = rotYVal;
     const rx = rotXVal;
 
-    // ── Draw Fibonacci dots ──
+    // ── Fibonacci dots ──
     for (let i = 0; i < dots.length; i++) {
       let [x, y, z] = dots[i];
-      x *= radius;
-      y *= radius;
-      z *= radius;
+      x *= radius; y *= radius; z *= radius;
+      [x, y, z] = rotateX(x, y, z, rx);
+      [x, y, z] = rotateY(x, y, z, ry);
 
-      [x, y, z] = rotX3(x, y, z, rx);
-      [x, y, z] = rotY3(x, y, z, ry);
+      if (z > 0) continue; // back-face cull (exact original threshold)
 
-      if (z > 0) continue; // back-face cull — only front hemisphere
-
-      const [sx, sy] = projectPoint(x, y, z, cx, cy, fov);
-      const depthAlpha = Math.max(0.08, 1 - (z + radius) / (2 * radius));
-      const dotSize = 1 + depthAlpha * 1;
+      const [sx, sy] = project(x, y, z, cx, cy, fov);
+      const alpha = Math.max(0.1, 1 - (z + radius) / (2 * radius));
+      const size = 1 + alpha * 0.8;
 
       ctx.beginPath();
-      ctx.arc(sx, sy, dotSize, 0, Math.PI * 2);
-      ctx.fillStyle = dotColorBase + depthAlpha.toFixed(2) + ")";
+      ctx.arc(sx, sy, size, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(239, 68, 68, ${alpha.toFixed(2)})`;
       ctx.fill();
     }
 
-    // ── Draw arc connections ──
-    for (const conn of connections) {
+    // ── Arc connections ──
+    for (const conn of TECH_CONNECTIONS) {
       const [lat1, lng1] = conn.from;
       const [lat2, lng2] = conn.to;
 
       let [x1, y1, z1] = latLngToXYZ(lat1, lng1, radius);
       let [x2, y2, z2] = latLngToXYZ(lat2, lng2, radius);
+      [x1, y1, z1] = rotateX(x1, y1, z1, rx);
+      [x1, y1, z1] = rotateY(x1, y1, z1, ry);
+      [x2, y2, z2] = rotateX(x2, y2, z2, rx);
+      [x2, y2, z2] = rotateY(x2, y2, z2, ry);
 
-      [x1, y1, z1] = rotX3(x1, y1, z1, rx);
-      [x1, y1, z1] = rotY3(x1, y1, z1, ry);
-      [x2, y2, z2] = rotX3(x2, y2, z2, rx);
-      [x2, y2, z2] = rotY3(x2, y2, z2, ry);
+      // Original threshold: skip if BOTH behind
+      if (z1 > radius * 0.3 && z2 > radius * 0.3) continue;
 
-      // Skip only if BOTH endpoints are fully behind the sphere
-      if (z1 > radius * 0.2 && z2 > radius * 0.2) continue;
+      const [sx1, sy1] = project(x1, y1, z1, cx, cy, fov);
+      const [sx2, sy2] = project(x2, y2, z2, cx, cy, fov);
 
-      const [sx1, sy1] = projectPoint(x1, y1, z1, cx, cy, fov);
-      const [sx2, sy2] = projectPoint(x2, y2, z2, cx, cy, fov);
+      // Elevated midpoint (original: radius * 1.25)
+      const mx = (x1 + x2) / 2;
+      const my = (y1 + y2) / 2;
+      const mz = (z1 + z2) / 2;
+      const ml = Math.sqrt(mx * mx + my * my + mz * mz) || 1;
+      const ah = radius * 1.25;
+      const [cpx, cpy] = project(mx / ml * ah, my / ml * ah, mz / ml * ah, cx, cy, fov);
 
-      // Arc midpoint elevated above sphere surface
-      const midX = (x1 + x2) / 2;
-      const midY = (y1 + y2) / 2;
-      const midZ = (z1 + z2) / 2;
-      const midLen = Math.sqrt(midX * midX + midY * midY + midZ * midZ) || 1;
-      const arcHeight = radius * 1.3;
-      const elevX = (midX / midLen) * arcHeight;
-      const elevY = (midY / midLen) * arcHeight;
-      const elevZ = (midZ / midLen) * arcHeight;
-      const [scx, scy] = projectPoint(elevX, elevY, elevZ, cx, cy, fov);
-
-      // Fade arcs that are partially behind
+      // Depth-based alpha so arcs near the edge fade gracefully
       const avgZ = (z1 + z2) / 2;
-      const arcAlpha = Math.max(0.08, Math.min(0.4, 0.4 * (1 - avgZ / radius)));
+      const arcA = Math.max(0.06, Math.min(0.5, 0.5 * (1 - avgZ / radius)));
 
       ctx.beginPath();
       ctx.moveTo(sx1, sy1);
-      ctx.quadraticCurveTo(scx, scy, sx2, sy2);
-      ctx.strokeStyle = `rgba(239, 68, 68, ${arcAlpha.toFixed(2)})`;
+      ctx.quadraticCurveTo(cpx, cpy, sx2, sy2);
+      ctx.strokeStyle = `rgba(239, 68, 68, ${arcA.toFixed(2)})`;
       ctx.lineWidth = 1.2;
       ctx.stroke();
 
-      // Traveling dot
+      // Traveling dot along the bezier
       const t = (Math.sin(time * 1.2 + lat1 * 0.1) + 1) / 2;
-      const tx = (1 - t) * (1 - t) * sx1 + 2 * (1 - t) * t * scx + t * t * sx2;
-      const ty = (1 - t) * (1 - t) * sy1 + 2 * (1 - t) * t * scy + t * t * sy2;
+      const tx = (1 - t) * (1 - t) * sx1 + 2 * (1 - t) * t * cpx + t * t * sx2;
+      const ty = (1 - t) * (1 - t) * sy1 + 2 * (1 - t) * t * cpy + t * t * sy2;
 
       ctx.beginPath();
-      ctx.arc(tx, ty, 2.5, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(239, 68, 68, ${Math.max(0.3, arcAlpha + 0.2).toFixed(2)})`;
+      ctx.arc(tx, ty, 2, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 140, 120, ${Math.min(1, arcA + 0.3).toFixed(2)})`;
       ctx.fill();
     }
 
-    // ── Draw skill markers — depth-sorted so front draws last ──
-    const sortedMarkers: { marker: Marker; sx: number; sy: number; z: number }[] = [];
+    // ── Skill markers (depth-sorted: back first, front last) ──
+    const visible: { m: Marker; sx: number; sy: number; z: number }[] = [];
 
-    for (const marker of markers) {
-      let [x, y, z] = latLngToXYZ(marker.lat, marker.lng, radius);
-      [x, y, z] = rotX3(x, y, z, rx);
-      [x, y, z] = rotY3(x, y, z, ry);
+    for (const m of TECH_MARKERS) {
+      let [x, y, z] = latLngToXYZ(m.lat, m.lng, radius);
+      [x, y, z] = rotateX(x, y, z, rx);
+      [x, y, z] = rotateY(x, y, z, ry);
 
-      // Show markers on the front hemisphere (z < 0 = facing camera)
-      if (z > radius * 0.15) continue;
+      if (z > radius * 0.1) continue; // original cull threshold
 
-      const [sx, sy] = projectPoint(x, y, z, cx, cy, fov);
-      sortedMarkers.push({ marker, sx, sy, z });
+      const [sx, sy] = project(x, y, z, cx, cy, fov);
+      visible.push({ m, sx, sy, z });
     }
 
-    // Sort back-to-front so front labels paint over back ones
-    sortedMarkers.sort((a, b) => b.z - a.z);
+    visible.sort((a, b) => b.z - a.z); // back-to-front
 
-    for (const { marker, sx, sy, z } of sortedMarkers) {
-      // Depth factor: 1.0 at front face, fades toward edges
-      const depthFactor = Math.max(0.15, 1 - (z + radius) / (2 * radius));
+    for (const { m, sx, sy, z } of visible) {
+      const depth = Math.max(0.1, 1 - (z + radius) / (2 * radius)); // 0.1 at edge → 1.0 at front
 
-      // Pulse ring
-      const pulse = Math.sin(time * 2 + marker.lat) * 0.5 + 0.5;
+      // Pulse ring (original: 4 + pulse*4)
+      const pulse = Math.sin(time * 2 + m.lat) * 0.5 + 0.5;
       ctx.beginPath();
-      ctx.arc(sx, sy, 5 + pulse * 5, 0, Math.PI * 2);
-      ctx.strokeStyle = pulseColor(0.15 + pulse * 0.2);
+      ctx.arc(sx, sy, 4 + pulse * 4, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(239, 68, 68, ${(0.2 + pulse * 0.15).toFixed(2)})`;
       ctx.lineWidth = 1;
       ctx.stroke();
 
-      // Core dot
+      // Core dot (original: constant 2.5)
       ctx.beginPath();
-      ctx.arc(sx, sy, 3.5 * depthFactor + 1, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(239, 68, 68, ${(depthFactor * 0.9 + 0.1).toFixed(2)})`;
+      ctx.arc(sx, sy, 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 140, 120, ${depth.toFixed(2)})`;
       ctx.fill();
 
-      // Skill label — bright white, visible
-      if (marker.label) {
-        const fontSize = Math.round(12 + depthFactor * 2); // 12-14px based on depth
-        ctx.font = `600 ${fontSize}px "Satoshi", system-ui, sans-serif`;
-        ctx.fillStyle = labelColor(Math.max(0.3, depthFactor * 0.95));
-        ctx.fillText(marker.label, sx + 10, sy + 4);
+      // Skill label — white, semibold, depth-faded
+      if (m.label) {
+        const fs = Math.round(11 + depth * 2); // 11px at edge, 13px at front
+        ctx.font = `600 ${fs}px "Satoshi", system-ui, sans-serif`;
+        ctx.fillStyle = `rgba(241, 241, 243, ${Math.max(0.25, depth * 0.9).toFixed(2)})`;
+        ctx.fillText(m.label, sx + 8, sy + 3);
       }
     }
 
@@ -351,60 +332,65 @@ export function initGlobe(canvas: HTMLCanvasElement): () => void {
     }
   }
 
-  // ── Pointer drag handlers with momentum ──
+  // ── Pointer handlers ──
 
-  function onPointerDown(e: PointerEvent) {
-    dragActive = true;
-    velocityY = 0;
-    velocityX = 0;
-    dragStartX = e.clientX;
-    dragStartY = e.clientY;
-    dragStartRotY = rotYVal;
-    dragStartRotX = rotXVal;
-    lastPointerX = e.clientX;
-    lastPointerY = e.clientY;
-    lastPointerTime = performance.now();
+  function onDown(e: PointerEvent) {
+    dragging = true;
+    velY = 0;
+    velX = 0;
+    dragOriginX = e.clientX;
+    dragOriginY = e.clientY;
+    dragRotY0 = rotYVal;
+    dragRotX0 = rotXVal;
+    prevPtrX = e.clientX;
+    prevPtrY = e.clientY;
+    prevPtrT = performance.now();
     canvas.setPointerCapture(e.pointerId);
   }
 
-  function onPointerMove(e: PointerEvent) {
-    if (!dragActive) return;
-    const dx = e.clientX - dragStartX;
-    const dy = e.clientY - dragStartY;
-    rotYVal = dragStartRotY + dx * 0.005;
-    rotXVal = Math.max(-1.2, Math.min(1.2, dragStartRotX + dy * 0.005));
+  function onMove(e: PointerEvent) {
+    if (!dragging) return;
 
-    // Track velocity for momentum
-    const now = performance.now();
-    const dt = now - lastPointerTime;
-    if (dt > 0) {
-      velocityY = (e.clientX - lastPointerX) * 0.005 * (16 / dt);
-      velocityX = (e.clientY - lastPointerY) * 0.005 * (16 / dt);
+    // Rotation from total drag delta (original logic)
+    const dx = e.clientX - dragOriginX;
+    const dy = e.clientY - dragOriginY;
+    rotYVal = dragRotY0 + dx * DRAG_SENS;
+    rotXVal = Math.max(-1, Math.min(1, dragRotX0 + dy * DRAG_SENS));
+
+    // Smooth velocity tracking (EWMA) for momentum on release
+    const instantVY = (e.clientX - prevPtrX) * DRAG_SENS;
+    const instantVX = (e.clientY - prevPtrY) * DRAG_SENS;
+    velY = velY * (1 - EWMA) + instantVY * EWMA;
+    velX = velX * (1 - EWMA) + instantVX * EWMA;
+
+    prevPtrX = e.clientX;
+    prevPtrY = e.clientY;
+    prevPtrT = performance.now();
+  }
+
+  function onUp() {
+    dragging = false;
+    // Clamp so it can't fly off
+    velY = Math.max(-VEL_CAP_Y, Math.min(VEL_CAP_Y, velY));
+    velX = Math.max(-VEL_CAP_X, Math.min(VEL_CAP_X, velX));
+    // Kill tiny residual velocity from slow releases
+    if (Math.abs(velY) < 0.001 && Math.abs(velX) < 0.001) {
+      velY = 0;
+      velX = 0;
     }
-    lastPointerX = e.clientX;
-    lastPointerY = e.clientY;
-    lastPointerTime = now;
   }
 
-  function onPointerUp() {
-    dragActive = false;
-    // Clamp initial momentum so it doesn't fly off
-    velocityY = Math.max(-0.08, Math.min(0.08, velocityY));
-    velocityX = Math.max(-0.04, Math.min(0.04, velocityX));
-  }
+  canvas.addEventListener("pointerdown", onDown);
+  canvas.addEventListener("pointermove", onMove);
+  canvas.addEventListener("pointerup", onUp);
 
-  canvas.addEventListener("pointerdown", onPointerDown);
-  canvas.addEventListener("pointermove", onPointerMove);
-  canvas.addEventListener("pointerup", onPointerUp);
-
-  // Start
   animId = requestAnimationFrame(draw);
   if (prefersReduced) draw();
 
   return () => {
     cancelAnimationFrame(animId);
-    canvas.removeEventListener("pointerdown", onPointerDown);
-    canvas.removeEventListener("pointermove", onPointerMove);
-    canvas.removeEventListener("pointerup", onPointerUp);
+    canvas.removeEventListener("pointerdown", onDown);
+    canvas.removeEventListener("pointermove", onMove);
+    canvas.removeEventListener("pointerup", onUp);
   };
 }

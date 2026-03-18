@@ -142,8 +142,8 @@ export function initGlobe(canvas: HTMLCanvasElement): () => void {
 
   // Tuning
   const SENS = 0.005;
-  const FRICTION = 0.95;
-  const EWMA = 0.3;
+  const FRICTION = 0.94;
+  const EWMA = 0.5;            // higher = more responsive to fast flicks
   const GESTURE_THRESHOLD = 8; // px before deciding scroll vs rotate
 
   // Adaptive dot count: fewer on small screens for perf
@@ -191,7 +191,7 @@ export function initGlobe(canvas: HTMLCanvasElement): () => void {
       if (Math.abs(vY) > 0.0001 || Math.abs(vX) > 0.0001) {
         rY += vY;
         rX += vX;
-        rX = Math.max(-1, Math.min(1, rX));
+        rX = Math.max(-1.2, Math.min(1.2, rX));
         vY *= FRICTION;
         vX *= FRICTION;
         if (Math.abs(vY) < 0.0001) vY = 0;
@@ -329,12 +329,16 @@ export function initGlobe(canvas: HTMLCanvasElement): () => void {
     }
   }
 
-  // ── Pointer handlers with scroll passthrough ──
+  // ── Pointer handlers ──
+  // Mouse: always rotates in both axes, no gesture detection needed.
+  // Touch: gesture detection — only bail to scroll if swipe is nearly
+  //        pure vertical (>85% vertical). Diagonal and horizontal rotate.
 
   function onDown(e: PointerEvent) {
     dragging = true;
-    gestureDecided = false;
-    gestureIsRotate = false;
+    // Mouse always rotates; touch needs gesture detection
+    gestureDecided = e.pointerType === "mouse";
+    gestureIsRotate = e.pointerType === "mouse";
     vY = 0;
     vX = 0;
     dOriginX = e.clientX;
@@ -352,13 +356,15 @@ export function initGlobe(canvas: HTMLCanvasElement): () => void {
     const dx = e.clientX - dOriginX;
     const dy = e.clientY - dOriginY;
 
-    // Gesture detection: wait until the user moves beyond threshold
+    // Touch gesture detection (skipped for mouse)
     if (!gestureDecided) {
       const dist = Math.abs(dx) + Math.abs(dy);
-      if (dist < GESTURE_THRESHOLD) return; // too small to decide
+      if (dist < GESTURE_THRESHOLD) return;
 
-      // If primarily vertical → let the browser scroll the page
-      if (Math.abs(dy) > Math.abs(dx) * 1.5) {
+      // Only bail to page scroll if swipe is nearly pure vertical
+      // (vertical component > 5× horizontal). This allows diagonal
+      // and horizontal swipes to rotate the globe in both axes.
+      if (Math.abs(dy) > Math.abs(dx) * 5) {
         gestureDecided = true;
         gestureIsRotate = false;
         dragging = false;
@@ -366,18 +372,17 @@ export function initGlobe(canvas: HTMLCanvasElement): () => void {
         return;
       }
 
-      // Horizontal or diagonal → rotate the globe
       gestureDecided = true;
       gestureIsRotate = true;
     }
 
     if (!gestureIsRotate) return;
 
-    // Rotate
+    // Rotate both axes
     rY = dRotY0 - dx * SENS;
-    rX = Math.max(-1, Math.min(1, dRotX0 + dy * SENS));
+    rX = Math.max(-1.2, Math.min(1.2, dRotX0 + dy * SENS));
 
-    // EWMA velocity
+    // Track velocity with EWMA — responsive to flick speed
     const ivY = -(e.clientX - prevX) * SENS;
     const ivX = (e.clientY - prevY) * SENS;
     vY = vY * (1 - EWMA) + ivY * EWMA;
@@ -392,17 +397,15 @@ export function initGlobe(canvas: HTMLCanvasElement): () => void {
     dragging = false;
     try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
 
-    // Clamp momentum
-    vY = Math.max(-0.06, Math.min(0.06, vY));
-    vX = Math.max(-0.03, Math.min(0.03, vX));
-    if (Math.abs(vY) < 0.001 && Math.abs(vX) < 0.001) {
-      vY = 0;
-      vX = 0;
-    }
+    // No tight caps — let friction handle deceleration naturally.
+    // Fast flick = high velocity = fast spin. Slow drag = slow spin.
+    // Only apply a safety cap to prevent insane values from glitched events.
+    const MAX_V = 0.25;
+    vY = Math.max(-MAX_V, Math.min(MAX_V, vY));
+    vX = Math.max(-MAX_V, Math.min(MAX_V, vX));
   }
 
-  function onCancel(e: PointerEvent) {
-    // Pointer stolen by browser (scroll takeover, OS gesture, etc.)
+  function onCancel(_e: PointerEvent) {
     dragging = false;
     gestureDecided = false;
     vY = 0;

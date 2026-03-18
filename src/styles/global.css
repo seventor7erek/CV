@@ -31,9 +31,9 @@
   --font-sans: "Satoshi", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
-  --glass-bg: rgba(255, 255, 255, 0.04);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-blur: blur(40px) saturate(180%);
+  --glass-bg: rgba(30, 30, 38, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-blur: blur(50px) saturate(190%) brightness(1.05);
 }
 
 /* --- Tailwind Theme --- */
@@ -45,8 +45,8 @@
   --color-accent-glow: rgba(239, 68, 68, 0.15);
   --color-text-primary: #f1f1f3;
   --color-text-muted: #9ca3af;
-  --color-glass-bg: rgba(255, 255, 255, 0.04);
-  --color-glass-border: rgba(255, 255, 255, 0.08);
+  --color-glass-bg: rgba(30, 30, 38, 0.65);
+  --color-glass-border: rgba(255, 255, 255, 0.12);
 
   --font-sans: "Satoshi", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
@@ -81,6 +81,32 @@
 .gsap-timeline-line {
   transform: scaleY(0);
   transform-origin: top;
+}
+
+/* --- iOS Glass Material --- */
+
+.ios-glass {
+  position: relative;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 0.5px solid var(--glass-border);
+  /* Top-edge light reflection */
+  box-shadow: inset 0 0.5px 0 0 rgba(255, 255, 255, 0.09);
+}
+
+/* Noise grain texture overlay — adds physical materiality */
+.ios-glass::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0.035;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 180px 180px;
 }
 
 /* --- Reduced Motion --- */

@@ -19,9 +19,11 @@
   no floating 3D objects)
 
 ## Glass Effect Values (iOS-style)
-background: rgba(255, 255, 255, 0.04)
-backdrop-filter: blur(40px) saturate(180%)
-border: 0.5px solid rgba(255, 255, 255, 0.08)
+background: rgba(30, 30, 38, 0.65)
+backdrop-filter: blur(50px) saturate(190%) brightness(1.05)
+border: 0.5px solid rgba(255, 255, 255, 0.12)
+box-shadow: inset 0 0.5px 0 0 rgba(255, 255, 255, 0.09)
+noise: SVG fractalNoise overlay at 3.5% opacity, mix-blend-mode: overlay
 
 ## Color Tokens
 - --bg-base: #0A0A0F

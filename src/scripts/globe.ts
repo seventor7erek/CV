@@ -1,5 +1,5 @@
 // Interactive 3D Globe — Canvas 2D renderer
-// Tech Stack skills as markers on a rotating sphere with physics-based interaction.
+// Tech Stack skills as markers on a rotating sphere with full physics.
 
 interface Marker {
   lat: number;
@@ -15,7 +15,7 @@ interface Connection {
 // ── Tech Stack markers spread evenly across the globe ──
 
 const TECH_MARKERS: Marker[] = [
-  // Content Production (northern latitudes, spread across longitudes)
+  // Content Production (northern latitudes)
   { lat: 62, lng: -120, label: "CapCut" },
   { lat: 52, lng: -70, label: "Captions App" },
   { lat: 58, lng: 15, label: "iPhone Filming" },
@@ -53,7 +53,7 @@ const TECH_MARKERS: Marker[] = [
 
 const TECH_CONNECTIONS: Connection[] = [
   // Dev relationships
-  { from: [-33, -140], to: [-40, -65] },    // TypeScript ↔ Astro
+  { from: [-33, -140], to: [-40, -65] },     // TypeScript ↔ Astro
   { from: [-40, -65], to: [-28, -15] },      // Astro ↔ Tailwind CSS
   { from: [-33, -140], to: [-45, 45] },      // TypeScript ↔ Rust
   { from: [-45, 45], to: [-50, 95] },        // Rust ↔ WebAssembly
@@ -91,21 +91,24 @@ function latLngToXYZ(lat: number, lng: number, radius: number): [number, number,
   ];
 }
 
-function rotateY(x: number, y: number, z: number, angle: number): [number, number, number] {
+function rotY3(x: number, y: number, z: number, angle: number): [number, number, number] {
   const cos = Math.cos(angle);
   const sin = Math.sin(angle);
   return [x * cos + z * sin, y, -x * sin + z * cos];
 }
 
-function rotateX(x: number, y: number, z: number, angle: number): [number, number, number] {
+function rotX3(x: number, y: number, z: number, angle: number): [number, number, number] {
   const cos = Math.cos(angle);
   const sin = Math.sin(angle);
   return [x, y * cos - z * sin, y * sin + z * cos];
 }
 
-function project(x: number, y: number, z: number, cx: number, cy: number, fov: number): [number, number] {
+function projectPoint(
+  x: number, y: number, z: number,
+  cx: number, cy: number, fov: number
+): [number, number, number] {
   const scale = fov / (fov + z);
-  return [x * scale + cx, y * scale + cy];
+  return [x * scale + cx, y * scale + cy, z];
 }
 
 // ── Fibonacci sphere dot generation ──
@@ -134,12 +137,13 @@ export function initGlobe(canvas: HTMLCanvasElement): () => void {
   const ctx = canvas.getContext("2d");
   if (!ctx) return () => {};
 
-  // Respect prefers-reduced-motion
   const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  // State
+  // ── Physics state ──
   let rotYVal = 0.4;
   let rotXVal = 0.3;
+  let velocityY = 0;        // drag momentum
+  let velocityX = 0;
   let time = 0;
   let animId = 0;
 
@@ -149,17 +153,22 @@ export function initGlobe(canvas: HTMLCanvasElement): () => void {
   let dragStartY = 0;
   let dragStartRotY = 0;
   let dragStartRotX = 0;
+  let lastPointerX = 0;
+  let lastPointerY = 0;
+  let lastPointerTime = 0;
 
-  // Colors — red accent per design system
-  const dotColorBase = "rgba(239, 68, 68, "; // #EF4444
-  const arcColor = "rgba(239, 68, 68, 0.45)";
-  const markerColor = "rgba(255, 130, 110, 1)";
-  const markerColorFaded = (a: number) => `rgba(255, 130, 110, ${a})`;
+  // ── Colors ──
+  const dotColorBase = "rgba(239, 68, 68, ";     // #EF4444
+  const arcColor = "rgba(239, 68, 68, 0.4)";
+  const markerDotColor = "rgba(239, 68, 68, 1)";
+  // Labels: bright white for visibility
+  const labelColor = (a: number) => `rgba(241, 241, 243, ${a})`;
+  const pulseColor = (a: number) => `rgba(239, 68, 68, ${a})`;
 
-  // Generate Fibonacci sphere grid
   const dots = generateDots(1200);
-
   const autoRotateSpeed = 0.002;
+  const friction = 0.95;        // momentum decay
+  const minVelocity = 0.0001;   // threshold to stop momentum
 
   function draw() {
     if (!ctx) return;
@@ -177,29 +186,41 @@ export function initGlobe(canvas: HTMLCanvasElement): () => void {
 
     const cx = w / 2;
     const cy = h / 2;
-    const radius = Math.min(w, h) * 0.38;
+    const radius = Math.min(w, h) * 0.42;
     const fov = 600;
 
-    // Auto rotate when idle
+    // ── Physics: momentum + auto-rotate ──
     if (!dragActive) {
-      rotYVal += autoRotateSpeed;
+      // Apply momentum from drag release
+      if (Math.abs(velocityY) > minVelocity || Math.abs(velocityX) > minVelocity) {
+        rotYVal += velocityY;
+        rotXVal += velocityX;
+        rotXVal = Math.max(-1.2, Math.min(1.2, rotXVal));
+        velocityY *= friction;
+        velocityX *= friction;
+        if (Math.abs(velocityY) < minVelocity) velocityY = 0;
+        if (Math.abs(velocityX) < minVelocity) velocityX = 0;
+      } else {
+        // Auto rotate when momentum has died
+        rotYVal += autoRotateSpeed;
+      }
     }
 
     time += 0.015;
 
     ctx.clearRect(0, 0, w, h);
 
-    // Outer glow — subtle red
-    const glowGrad = ctx.createRadialGradient(cx, cy, radius * 0.8, cx, cy, radius * 1.5);
-    glowGrad.addColorStop(0, "rgba(239, 68, 68, 0.03)");
+    // ── Outer glow ──
+    const glowGrad = ctx.createRadialGradient(cx, cy, radius * 0.8, cx, cy, radius * 1.6);
+    glowGrad.addColorStop(0, "rgba(239, 68, 68, 0.04)");
     glowGrad.addColorStop(1, "rgba(239, 68, 68, 0)");
     ctx.fillStyle = glowGrad;
     ctx.fillRect(0, 0, w, h);
 
-    // Globe outline ring
+    // ── Globe outline ──
     ctx.beginPath();
     ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-    ctx.strokeStyle = "rgba(239, 68, 68, 0.06)";
+    ctx.strokeStyle = "rgba(239, 68, 68, 0.08)";
     ctx.lineWidth = 1;
     ctx.stroke();
 
@@ -213,14 +234,14 @@ export function initGlobe(canvas: HTMLCanvasElement): () => void {
       y *= radius;
       z *= radius;
 
-      [x, y, z] = rotateX(x, y, z, rx);
-      [x, y, z] = rotateY(x, y, z, ry);
+      [x, y, z] = rotX3(x, y, z, rx);
+      [x, y, z] = rotY3(x, y, z, ry);
 
-      if (z > 0) continue; // back-face cull
+      if (z > 0) continue; // back-face cull — only front hemisphere
 
-      const [sx, sy] = project(x, y, z, cx, cy, fov);
-      const depthAlpha = Math.max(0.1, 1 - (z + radius) / (2 * radius));
-      const dotSize = 1 + depthAlpha * 0.8;
+      const [sx, sy] = projectPoint(x, y, z, cx, cy, fov);
+      const depthAlpha = Math.max(0.08, 1 - (z + radius) / (2 * radius));
+      const dotSize = 1 + depthAlpha * 1;
 
       ctx.beginPath();
       ctx.arc(sx, sy, dotSize, 0, Math.PI * 2);
@@ -228,7 +249,7 @@ export function initGlobe(canvas: HTMLCanvasElement): () => void {
       ctx.fill();
     }
 
-    // ── Draw arc connections between related skills ──
+    // ── Draw arc connections ──
     for (const conn of connections) {
       const [lat1, lng1] = conn.from;
       const [lat2, lng2] = conn.to;
@@ -236,75 +257,92 @@ export function initGlobe(canvas: HTMLCanvasElement): () => void {
       let [x1, y1, z1] = latLngToXYZ(lat1, lng1, radius);
       let [x2, y2, z2] = latLngToXYZ(lat2, lng2, radius);
 
-      [x1, y1, z1] = rotateX(x1, y1, z1, rx);
-      [x1, y1, z1] = rotateY(x1, y1, z1, ry);
-      [x2, y2, z2] = rotateX(x2, y2, z2, rx);
-      [x2, y2, z2] = rotateY(x2, y2, z2, ry);
+      [x1, y1, z1] = rotX3(x1, y1, z1, rx);
+      [x1, y1, z1] = rotY3(x1, y1, z1, ry);
+      [x2, y2, z2] = rotX3(x2, y2, z2, rx);
+      [x2, y2, z2] = rotY3(x2, y2, z2, ry);
 
-      // Only draw if at least one endpoint faces camera
-      if (z1 > radius * 0.3 && z2 > radius * 0.3) continue;
+      // Skip only if BOTH endpoints are fully behind the sphere
+      if (z1 > radius * 0.2 && z2 > radius * 0.2) continue;
 
-      const [sx1, sy1] = project(x1, y1, z1, cx, cy, fov);
-      const [sx2, sy2] = project(x2, y2, z2, cx, cy, fov);
+      const [sx1, sy1] = projectPoint(x1, y1, z1, cx, cy, fov);
+      const [sx2, sy2] = projectPoint(x2, y2, z2, cx, cy, fov);
 
-      // Elevated midpoint for arc curvature
+      // Arc midpoint elevated above sphere surface
       const midX = (x1 + x2) / 2;
       const midY = (y1 + y2) / 2;
       const midZ = (z1 + z2) / 2;
-      const midLen = Math.sqrt(midX * midX + midY * midY + midZ * midZ);
-      const arcHeight = radius * 1.25;
+      const midLen = Math.sqrt(midX * midX + midY * midY + midZ * midZ) || 1;
+      const arcHeight = radius * 1.3;
       const elevX = (midX / midLen) * arcHeight;
       const elevY = (midY / midLen) * arcHeight;
       const elevZ = (midZ / midLen) * arcHeight;
-      const [scx, scy] = project(elevX, elevY, elevZ, cx, cy, fov);
+      const [scx, scy] = projectPoint(elevX, elevY, elevZ, cx, cy, fov);
+
+      // Fade arcs that are partially behind
+      const avgZ = (z1 + z2) / 2;
+      const arcAlpha = Math.max(0.08, Math.min(0.4, 0.4 * (1 - avgZ / radius)));
 
       ctx.beginPath();
       ctx.moveTo(sx1, sy1);
       ctx.quadraticCurveTo(scx, scy, sx2, sy2);
-      ctx.strokeStyle = arcColor;
+      ctx.strokeStyle = `rgba(239, 68, 68, ${arcAlpha.toFixed(2)})`;
       ctx.lineWidth = 1.2;
       ctx.stroke();
 
-      // Traveling dot along arc
+      // Traveling dot
       const t = (Math.sin(time * 1.2 + lat1 * 0.1) + 1) / 2;
       const tx = (1 - t) * (1 - t) * sx1 + 2 * (1 - t) * t * scx + t * t * sx2;
       const ty = (1 - t) * (1 - t) * sy1 + 2 * (1 - t) * t * scy + t * t * sy2;
 
       ctx.beginPath();
-      ctx.arc(tx, ty, 2, 0, Math.PI * 2);
-      ctx.fillStyle = markerColor;
+      ctx.arc(tx, ty, 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(239, 68, 68, ${Math.max(0.3, arcAlpha + 0.2).toFixed(2)})`;
       ctx.fill();
     }
 
-    // ── Draw skill markers with labels ──
+    // ── Draw skill markers — depth-sorted so front draws last ──
+    const sortedMarkers: { marker: Marker; sx: number; sy: number; z: number }[] = [];
+
     for (const marker of markers) {
       let [x, y, z] = latLngToXYZ(marker.lat, marker.lng, radius);
-      [x, y, z] = rotateX(x, y, z, rx);
-      [x, y, z] = rotateY(x, y, z, ry);
+      [x, y, z] = rotX3(x, y, z, rx);
+      [x, y, z] = rotY3(x, y, z, ry);
 
-      if (z > radius * 0.1) continue; // back-face cull
+      // Show markers on the front hemisphere (z < 0 = facing camera)
+      if (z > radius * 0.15) continue;
 
-      const [sx, sy] = project(x, y, z, cx, cy, fov);
+      const [sx, sy] = projectPoint(x, y, z, cx, cy, fov);
+      sortedMarkers.push({ marker, sx, sy, z });
+    }
+
+    // Sort back-to-front so front labels paint over back ones
+    sortedMarkers.sort((a, b) => b.z - a.z);
+
+    for (const { marker, sx, sy, z } of sortedMarkers) {
+      // Depth factor: 1.0 at front face, fades toward edges
+      const depthFactor = Math.max(0.15, 1 - (z + radius) / (2 * radius));
 
       // Pulse ring
       const pulse = Math.sin(time * 2 + marker.lat) * 0.5 + 0.5;
       ctx.beginPath();
-      ctx.arc(sx, sy, 5 + pulse * 4, 0, Math.PI * 2);
-      ctx.strokeStyle = markerColorFaded(0.2 + pulse * 0.15);
+      ctx.arc(sx, sy, 5 + pulse * 5, 0, Math.PI * 2);
+      ctx.strokeStyle = pulseColor(0.15 + pulse * 0.2);
       ctx.lineWidth = 1;
       ctx.stroke();
 
-      // Core dot (slightly larger — these are the content)
+      // Core dot
       ctx.beginPath();
-      ctx.arc(sx, sy, 3, 0, Math.PI * 2);
-      ctx.fillStyle = markerColor;
+      ctx.arc(sx, sy, 3.5 * depthFactor + 1, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(239, 68, 68, ${(depthFactor * 0.9 + 0.1).toFixed(2)})`;
       ctx.fill();
 
-      // Skill label
+      // Skill label — bright white, visible
       if (marker.label) {
-        ctx.font = '11px "Satoshi", system-ui, sans-serif';
-        ctx.fillStyle = markerColorFaded(0.75);
-        ctx.fillText(marker.label, sx + 9, sy + 4);
+        const fontSize = Math.round(12 + depthFactor * 2); // 12-14px based on depth
+        ctx.font = `600 ${fontSize}px "Satoshi", system-ui, sans-serif`;
+        ctx.fillStyle = labelColor(Math.max(0.3, depthFactor * 0.95));
+        ctx.fillText(marker.label, sx + 10, sy + 4);
       }
     }
 
@@ -313,14 +351,19 @@ export function initGlobe(canvas: HTMLCanvasElement): () => void {
     }
   }
 
-  // ── Pointer drag handlers ──
+  // ── Pointer drag handlers with momentum ──
 
   function onPointerDown(e: PointerEvent) {
     dragActive = true;
+    velocityY = 0;
+    velocityX = 0;
     dragStartX = e.clientX;
     dragStartY = e.clientY;
     dragStartRotY = rotYVal;
     dragStartRotX = rotXVal;
+    lastPointerX = e.clientX;
+    lastPointerY = e.clientY;
+    lastPointerTime = performance.now();
     canvas.setPointerCapture(e.pointerId);
   }
 
@@ -329,11 +372,25 @@ export function initGlobe(canvas: HTMLCanvasElement): () => void {
     const dx = e.clientX - dragStartX;
     const dy = e.clientY - dragStartY;
     rotYVal = dragStartRotY + dx * 0.005;
-    rotXVal = Math.max(-1, Math.min(1, dragStartRotX + dy * 0.005));
+    rotXVal = Math.max(-1.2, Math.min(1.2, dragStartRotX + dy * 0.005));
+
+    // Track velocity for momentum
+    const now = performance.now();
+    const dt = now - lastPointerTime;
+    if (dt > 0) {
+      velocityY = (e.clientX - lastPointerX) * 0.005 * (16 / dt);
+      velocityX = (e.clientY - lastPointerY) * 0.005 * (16 / dt);
+    }
+    lastPointerX = e.clientX;
+    lastPointerY = e.clientY;
+    lastPointerTime = now;
   }
 
   function onPointerUp() {
     dragActive = false;
+    // Clamp initial momentum so it doesn't fly off
+    velocityY = Math.max(-0.08, Math.min(0.08, velocityY));
+    velocityX = Math.max(-0.04, Math.min(0.04, velocityX));
   }
 
   canvas.addEventListener("pointerdown", onPointerDown);
@@ -342,13 +399,8 @@ export function initGlobe(canvas: HTMLCanvasElement): () => void {
 
   // Start
   animId = requestAnimationFrame(draw);
+  if (prefersReduced) draw();
 
-  // Single static frame for reduced motion
-  if (prefersReduced) {
-    draw();
-  }
-
-  // Cleanup
   return () => {
     cancelAnimationFrame(animId);
     canvas.removeEventListener("pointerdown", onPointerDown);

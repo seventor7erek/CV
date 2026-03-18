@@ -201,13 +201,6 @@ export function initGlobe(canvas: HTMLCanvasElement): () => void {
     time += 0.015;
     ctx.clearRect(0, 0, w, h);
 
-    // ── Outer glow ──
-    const glow = ctx.createRadialGradient(cx, cy, radius * 0.8, cx, cy, radius * 1.5);
-    glow.addColorStop(0, "rgba(239, 68, 68, 0.03)");
-    glow.addColorStop(1, "rgba(239, 68, 68, 0)");
-    ctx.fillStyle = glow;
-    ctx.fillRect(0, 0, w, h);
-
     // ── Globe ring ──
     ctx.beginPath();
     ctx.arc(cx, cy, radius, 0, Math.PI * 2);

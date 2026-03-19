@@ -31,10 +31,10 @@
 :root {
   --bg-base: #08080d;
   --bg-surface: #111118;
-  --accent: #c9a96e;
-  --accent-light: #d4b97a;
-  --accent-glow: rgba(201, 169, 110, 0.10);
-  --accent-muted: rgba(201, 169, 110, 0.35);
+  --accent: #ffae42;
+  --accent-light: #ffc068;
+  --accent-glow: rgba(255, 174, 66, 0.10);
+  --accent-muted: rgba(255, 174, 66, 0.35);
   --text-primary: #ebebed;
   --text-secondary: #787d86;
 
@@ -54,10 +54,10 @@
 @theme {
   --color-bg-base: #08080d;
   --color-bg-surface: #111118;
-  --color-accent: #c9a96e;
-  --color-accent-light: #d4b97a;
-  --color-accent-glow: rgba(201, 169, 110, 0.10);
-  --color-accent-muted: rgba(201, 169, 110, 0.35);
+  --color-accent: #ffae42;
+  --color-accent-light: #ffc068;
+  --color-accent-glow: rgba(255, 174, 66, 0.10);
+  --color-accent-muted: rgba(255, 174, 66, 0.35);
   --color-text-primary: #ebebed;
   --color-text-muted: #787d86;
   --color-glass-bg: rgba(16, 16, 22, 0.55);

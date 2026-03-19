@@ -123,8 +123,8 @@ void main(void) {
   float dist = length(vPosition);
   float opacity = (96.0 - dist) / 256.0 * 0.5;
   opacity = clamp(opacity, 0.0, 0.4);
-  // Champagne gold matching #C9A96E
-  vec3 color = vec3(0.79, 0.66, 0.43);
+  // Amber accent matching #FFAE42
+  vec3 color = vec3(1.0, 0.68, 0.26);
   fragColor = vec4(color, opacity);
 }`;
 

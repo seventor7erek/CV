@@ -7,11 +7,11 @@
 
 ## Design Constraints (STRICT)
 - Dark theme ONLY. Base bg: #08080D
-- ONE accent color: #C9A96E (champagne gold) — used sparingly
+- ONE accent color: #FFAE42 (amber) — used sparingly
 - iOS-style frosted glass on all interactive surfaces (3 tiers: subtle, base, dense)
 - Whitespace: generous. Sections padded 160px+ vertically
 - Typography: Space Grotesk (headings) + Inter (body) + JetBrains Mono (code)
-- NO gradients (except subtle gold glow blobs)
+- NO gradients (except subtle amber glow blobs)
 - NO box shadows (except inset glass reflections)
 - NO border-radius above 12px
 - NO progress bars for skills
@@ -43,10 +43,10 @@ noise: SVG fractalNoise overlay at 2.5% opacity, mix-blend-mode: overlay
 ## Color Tokens
 - --bg-base: #08080D
 - --bg-surface: #111118
-- --accent: #C9A96E
-- --accent-light: #D4B97A
-- --accent-glow: rgba(201, 169, 110, 0.10)
-- --accent-muted: rgba(201, 169, 110, 0.35)
+- --accent: #FFAE42
+- --accent-light: #FFC068
+- --accent-glow: rgba(255, 174, 66, 0.10)
+- --accent-muted: rgba(255, 174, 66, 0.35)
 - --text-primary: #EBEBED
 - --text-secondary: #787D86 (mapped as --color-text-muted in Tailwind @theme)
 
